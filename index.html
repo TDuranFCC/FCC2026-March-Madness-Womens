@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>March Madness 2026 - Bracket Tracker Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #F8F3F0;
+      color: #30302E;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    header {
+      margin-bottom: 60px;
+      border-bottom: 2px solid #30302E;
+      padding-bottom: 30px;
+    }
+
+    h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      color: #8E9196;
+      font-weight: 500;
+    }
+
+    .section {
+      margin-bottom: 80px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      margin-bottom: 30px;
+    }
+
+    .section-number {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #DC1A41;
+      margin-right: 15px;
+      min-width: 60px;
+    }
+
+    h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    .kpi-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .kpi-card {
+      background: #FFFFFF;
+      border-left: 4px solid #DC1A41;
+      padding: 25px;
+      border-radius: 4px;
+    }
+
+    .kpi-label {
+      font-size: 0.85rem;
+      color: #8E9196;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+
+    .kpi-value {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #30302E;
+      margin-bottom: 8px;
+    }
+
+    .kpi-detail {
+      font-size: 0.9rem;
+      color: #30302E;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background: #FFFFFF;
+      padding: 30px;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .card-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 25px;
+      color: #30302E;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 400px;
+      margin-bottom: 20px;
+    }
+
+    .small-chart {
+      position: relative;
+      height: 300px;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th {
+      text-align: left;
+      padding: 12px;
+      border-bottom: 2px solid #30302E;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: #30302E;
+      background-color: #F8F3F0;
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #E5E0DC;
+      font-size: 0.9rem;
+    }
+
+    tr:hover {
+      background-color: #F8F3F0;
+    }
+
+    .medal {
+      font-size: 1.5rem;
+    }
+
+    .ranking-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      background: #F8F3F0;
+      border-radius: 2px;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .status-alive {
+      color: #346E4A;
+      font-weight: 600;
+    }
+
+    .status-eliminated {
+      color: #DC1A41;
+      font-weight: 600;
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    .game-card {
+      background: #FFFFFF;
+      padding: 20px;
+      border-radius: 4px;
+      text-align: center;
+      border: 1px solid #E5E0DC;
+    }
+
+    .game-teams {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .team-info {
+      flex: 1;
+      text-align: center;
+    }
+
+    .team-logo {
+      width: 40px;
+      height: 40px;
+      margin: 0 auto 8px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    .team-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
+
+    .team-score {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .vs-text {
+      margin: 0 10px;
+      color: #8E9196;
+    }
+
+    .game-status {
+      font-size: 0.8rem;
+      color: #8E9196;
+      margin-top: 10px;
+    }
+
+    .leaderboard-row {
+      display: grid;
+      grid-template-columns: 60px 1fr 80px 80px 100px 70px 60px 60px 60px 60px 60px 60px 120px;
+      gap: 15px;
+      align-items: center;
+      padding: 15px;
+      background: #FFFFFF;
+      margin-bottom: 10px;
+      border-radius: 4px;
+    }
+
+    .leaderboard-header {
+      display: grid;
+      grid-template-columns: 60px 1fr 80px 80px 100px 70px 60px 60px 60px 60px 60px 60px 120px;
+      gap: 15px;
+      margin-bottom: 20px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      color: #8E9196;
+    }
+
+    .round-label {
+      display: inline-block;
+      padding: 4px 8px;
+      background: #F8F3F0;
+      border-radius: 2px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .efficiency-bar {
+      width: 100%;
+      height: 6px;
+      background: #E5E0DC;
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .efficiency-fill {
+      height: 100%;
+      background: #346E4A;
+      border-radius: 2px;
+    }
+
+    .contrarian-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      border-bottom: 1px solid #E5E0DC;
+      font-size: 0.9rem;
+    }
+
+    .contrarian-item:last-child {
+      border-bottom: none;
+    }
+
+    .contrarian-left {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex: 1;
+    }
+
+    .contrarian-logo {
+      width: 30px;
+      height: 30px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    .contrarian-info {
+      flex: 1;
+    }
+
+    .contrarian-person {
+      font-weight: 600;
+      color: #30302E;
+    }
+
+    .contrarian-team {
+      font-size: 0.85rem;
+      color: #8E9196;
+    }
+
+    .contrarian-pct {
+      font-weight: 600;
+      color: #DC1A41;
+      min-width: 60px;
+      text-align: right;
+    }
+
+    .contrarian-result {
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 2px;
+      font-weight: 600;
+      min-width: 70px;
+      text-align: center;
+    }
+
+    .result-correct {
+      background: #346E4A;
+      color: white;
+    }
+
+    .result-incorrect {
+      background: #DC1A41;
+      color: white;
+    }
+
+    .result-undecided {
+      background: #8E9196;
+      color: white;
+    }
+
+    .leaderboard-row.eliminated-row {
+      text-decoration: line-through;
+      opacity: 0.6;
+    }
+
+    .leaderboard-row.leader-row {
+      border-left: 4px solid #D4A843;
+      background: #FFFDF8;
+    }
+
+    .consensus-bars {
+      margin-top: 15px;
+    }
+
+    .consensus-row {
+      display: grid;
+      grid-template-columns: 80px 1fr 100px;
+      gap: 15px;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 12px;
+      background: #F8F3F0;
+      border-radius: 2px;
+    }
+
+    .consensus-round {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .consensus-bar {
+      width: 100%;
+      height: 8px;
+      background: #E5E0DC;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .consensus-fill {
+      height: 100%;
+      background: #27455C;
+      border-radius: 2px;
+    }
+
+    .consensus-pct {
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-align: right;
+    }
+
+    .heatmap-cell {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 50px;
+      height: 50px;
+      margin: 2px;
+      border-radius: 2px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .heatmap-container {
+      display: flex;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .summary-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .summary-stat {
+      background: #FFFFFF;
+      padding: 20px;
+      border-radius: 4px;
+      text-align: center;
+    }
+
+    .summary-number {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #30302E;
+      margin-bottom: 8px;
+    }
+
+    .summary-label {
+      font-size: 0.85rem;
+      color: #8E9196;
+      font-weight: 600;
+    }
+
+    footer {
+      margin-top: 80px;
+      padding-top: 30px;
+      border-top: 1px solid #E5E0DC;
+      text-align: center;
+      color: #8E9196;
+      font-size: 0.9rem;
+    }
+
+    footer a {
+      color: #27455C;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 1024px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
+
+      .leaderboard-row,
+      .leaderboard-header {
+        grid-template-columns: 50px 120px 60px 60px 80px 60px 50px 50px 50px 50px 50px 50px 100px;
+        font-size: 0.75rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .kpi-container {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      .section-number {
+        font-size: 1.5rem;
+      }
+
+      h2 {
+        font-size: 1.3rem;
+      }
+
+      .card {
+        padding: 20px;
+      }
+
+      .leaderboard-row,
+      .leaderboard-header {
+        grid-template-columns: 40px 100px 50px 50px 70px 50px 40px 40px 40px 40px 40px 40px 80px;
+      }
+
+      .contrarian-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .contrarian-right {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>March Madness 2026 — Women's Finance</h1>
+      <p class="subtitle">Bracket Tracker Dashboard</p>
+    </header>
+
+    <!-- SECTION 01: EXECUTIVE SUMMARY -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-number">01</div>
+        <h2>Dany Kotlyar Leads by 0 Points with 95.7th Percentile Nationally</h2>
+      </div>
+      <div class="kpi-container">
+        <div class="kpi-card">
+          <div class="kpi-label">Current Leader</div>
+          <div class="kpi-value">390</div>
+          <div class="kpi-detail">Dany Kotlyar</div>
+          <div class="kpi-detail" style="font-size: 0.8rem; margin-top: 8px;">
+            34W – 3L
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Lead Margin</div>
+          <div class="kpi-value">0</div>
+          <div class="kpi-detail">vs 2nd place</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Group Average</div>
+          <div class="kpi-value">355</div>
+          <div class="kpi-detail">Median: 360</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">National Percentile</div>
+          <div class="kpi-value">95.7%</div>
+          <div class="kpi-detail">Leader rank vs nation</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 02: PERFORMANCE ANALYSIS -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-number">02</div>
+        <h2>Performance Analysis</h2>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Dany Kotlyar Holds a 0-Point Lead Over Brian Park</div>
+          <div class="chart-container">
+            <canvas id="pointsChart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Dany Kotlyar Has the Highest Ceiling at 1890 Max Points</div>
+          <div class="chart-container">
+            <canvas id="upsideChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 03: ROUND-BY-ROUND BREAKDOWN -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-number">03</div>
+        <h2>8 Players Tied for Best R32 with 100 Points Each</h2>
+      </div>
+      <div class="card full-width">
+        <div class="chart-container">
+          <canvas id="roundByRoundChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 04: CHAMPION ANALYSIS -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-number">04</div>
+        <h2>Champion Analysis</h2>
+      </div>
+      <div class="card full-width">
+        <div class="card-title">8 of 15 Brackets Are Riding on UConn</div>
+        <div class="chart-container">
+          <canvas id="championChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 05: PICK CONSENSUS & CONTRARIAN ANALYSIS -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-number">05</div>
+        <h2>Pick Consensus & Contrarian Analysis</h2>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Boldest Picks: Where Group Members Went Against the Majority</div>
+          <div style="font-size: 0.85rem; color: #8E9196; margin-bottom: 15px;">Picks where fewer than 35% of the group agreed — the boldest bets in the bracket</div>
+          <div class="table-container">
+            <div class="contrarian-item"><div class="contrarian-left"><div class="contrarian-logo" style="background-image: url('https://a.espncdn.com/i/teamlogos/ncaa/500/2641.png')"></div><div class="contrarian-info"><div class="contrarian-person">Christopher Lee</div><div class="contrarian-team">Texas Tech</div></div></div><div class="contrarian-pct">7%</div><div class="contrarian-result result-incorrect">INCORRECT</div></div><div class="contrarian-item"><div class="contrarian-left"><div class="contrarian-logo" style="background-image: url('https://a.espncdn.com/i/teamlogos/ncaa/500/239.png')"></div><div class="contrarian-info"><div class="contrarian-person">Mark Neary</div><div class="contrarian-team">Baylor</div></div></div><div class="contrarian-pct">7%</div><div class="contrarian-result result-incorrect">INCORRECT</div></div><div class="contrarian-item"><div class="contrarian-left"><div class="contrarian-logo" style="background-image: url('https://a.espncdn.com/i/teamlogos/ncaa/500/38.png')"></div><div class="contrarian-info"><div class="contrarian-person">Claire Dieckgraeff</div><div class="contrarian-team">Colorado</div></div></div><div class="contrarian-pct">7%</div><div class="contrarian-result result-incorrect">INCORRECT</div></div><div class="contrarian-item"><div class="contrarian-left"><div class="contrarian-logo" style="background-image: url('https://a.espncdn.com/i/teamlogos/ncaa/500/61.png')"></div><div class="contrarian-info"><div class="contrarian-person">Caitlin King</div><div class="contrarian-team">Georgia</div></div></div><div class="contrarian-pct">13%</div><div class="contrarian-result result-incorrect">INCORRECT</div></div><div class="contrarian-item"><div class="contrarian-left"><div class="contrarian-logo" style="background-image: url('https://a.espncdn.com/i/teamlogos/ncaa/500/61.png')"></div><div class="contrarian-info"><div class="contrarian-person">Christopher Lee</div><div class="contrarian-team">Georgia</div></div></div><div class="contrarian-pct">13%</div><div class="contrarian-result result-incorrect">INCORRECT</div></div><div class="contrarian-item"><div class="contrarian-left"><div class="contrarian-logo" style="background-image: url('https://a.espncdn.com/i/teamlogos/ncaa/500/145.png')"></div><div class="contrarian-info"><div class="contrarian-person">Taylor Duran</div><div class="contrarian-team">Ole Miss</div></div></div><div class="contrarian-pct">20%</div><div class="contrarian-result result-incorrect">INCORRECT</div></div><div class="contrarian-item"><div class="contrarian-left"><div class="contrarian-logo" style="background-image: url('https://a.espncdn.com/i/teamlogos/ncaa/500/145.png')"></div><div class="contrarian-info"><div class="contrarian-person">Mark Neary</div><div class="contrarian-team">Ole Miss</div></div></div><div class="contrarian-pct">20%</div><div class="contrarian-result result-incorrect">INCORRECT</div></div><div class="contrarian-item"><div class="contrarian-left"><div class="contrarian-logo" style="background-image: url('https://a.espncdn.com/i/teamlogos/ncaa/500/145.png')"></div><div class="contrarian-info"><div class="contrarian-person">Christopher Lee</div><div class="contrarian-team">Ole Miss</div></div></div><div class="contrarian-pct">20%</div><div class="contrarian-result result-incorrect">INCORRECT</div></div><div class="contrarian-item"><div class="contrarian-left"><div class="contrarian-logo" style="background-image: url('https://a.espncdn.com/i/teamlogos/ncaa/500/333.png')"></div><div class="contrarian-info"><div class="contrarian-person">Tim Ulaszek</div><div class="contrarian-team">Alabama</div></div></div><div class="contrarian-pct">20%</div><div class="contrarian-result result-undecided">UNDECIDED</div></div><div class="contrarian-item"><div class="contrarian-left"><div class="contrarian-logo" style="background-image: url('https://a.espncdn.com/i/teamlogos/ncaa/500/333.png')"></div><div class="contrarian-info"><div class="contrarian-person">Caitlin King</div><div class="contrarian-team">Alabama</div></div></div><div class="contrarian-pct">20%</div><div class="contrarian-result result-undecided">UNDECIDED</div></div><div class="contrarian-item"><div class="contrarian-left"><div class="contrarian-logo" style="background-image: url('https://a.espncdn.com/i/teamlogos/ncaa/500/333.png')"></div><div class="contrarian-info"><div class="contrarian-person">Christopher Lee</div><div class="contrarian-team">Alabama</div></div></div><div class="contrarian-pct">20%</div><div class="contrarian-result result-undecided">UNDECIDED</div></div><div class="contrarian-item"><div class="contrarian-left"><div class="contrarian-logo" style="background-image: url('https://a.espncdn.com/i/teamlogos/ncaa/500/120.png')"></div><div class="contrarian-info"><div class="contrarian-person">Michael Perry</div><div class="contrarian-team">Maryland</div></div></div><div class="contrarian-pct">33%</div><div class="contrarian-result result-incorrect">INCORRECT</div></div><div class="contrarian-item"><div class="contrarian-left"><div class="contrarian-logo" style="background-image: url('https://a.espncdn.com/i/teamlogos/ncaa/500/120.png')"></div><div class="contrarian-info"><div class="contrarian-person">Carlee Constable</div><div class="contrarian-team">Maryland</div></div></div><div class="contrarian-pct">33%</div><div class="contrarian-result result-incorrect">INCORRECT</div></div><div class="contrarian-item"><div class="contrarian-left"><div class="contrarian-logo" style="background-image: url('https://a.espncdn.com/i/teamlogos/ncaa/500/120.png')"></div><div class="contrarian-info"><div class="contrarian-person">Claire Dieckgraeff</div><div class="contrarian-team">Maryland</div></div></div><div class="contrarian-pct">33%</div><div class="contrarian-result result-incorrect">INCORRECT</div></div><div class="contrarian-item"><div class="contrarian-left"><div class="contrarian-logo" style="background-image: url('https://a.espncdn.com/i/teamlogos/ncaa/500/120.png')"></div><div class="contrarian-info"><div class="contrarian-person">Mark Neary</div><div class="contrarian-team">Maryland</div></div></div><div class="contrarian-pct">33%</div><div class="contrarian-result result-incorrect">INCORRECT</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">15 of 15 Brackets Picked Michigan — Most Unanimous Pick in the Group</div>
+          <div style="font-size: 0.85rem; color: #8E9196; margin-bottom: 15px;">For each Sweet 16 matchup, how many of the 15 brackets picked the same winning team</div>
+          <div class="consensus-bars">
+            <div class="consensus-row" style="grid-template-columns: 140px 1fr 100px;"><div class="consensus-round" style="min-width: 140px;">Michigan<span style="color:#346E4A; font-size: 0.75rem; font-weight: 600; margin-left: 6px;">&#10003; WON</span></div><div class="consensus-bar"><div class="consensus-fill" style="width: 100%; background: #346E4A;"></div></div><div class="consensus-pct" style="white-space: nowrap;">15/15 (100%)</div></div><div class="consensus-row" style="grid-template-columns: 140px 1fr 100px;"><div class="consensus-round" style="min-width: 140px;">Texas<span style="color:#8E9196; font-size: 0.75rem; font-weight: 600; margin-left: 6px;">TBD</span></div><div class="consensus-bar"><div class="consensus-fill" style="width: 100%; background: #27455C;"></div></div><div class="consensus-pct" style="white-space: nowrap;">15/15 (100%)</div></div><div class="consensus-row" style="grid-template-columns: 140px 1fr 100px;"><div class="consensus-round" style="min-width: 140px;">TCU<span style="color:#8E9196; font-size: 0.75rem; font-weight: 600; margin-left: 6px;">TBD</span></div><div class="consensus-bar"><div class="consensus-fill" style="width: 100%; background: #27455C;"></div></div><div class="consensus-pct" style="white-space: nowrap;">15/15 (100%)</div></div><div class="consensus-row" style="grid-template-columns: 140px 1fr 100px;"><div class="consensus-round" style="min-width: 140px;">UConn<span style="color:#8E9196; font-size: 0.75rem; font-weight: 600; margin-left: 6px;">TBD</span></div><div class="consensus-bar"><div class="consensus-fill" style="width: 100%; background: #27455C;"></div></div><div class="consensus-pct" style="white-space: nowrap;">15/15 (100%)</div></div><div class="consensus-row" style="grid-template-columns: 140px 1fr 100px;"><div class="consensus-round" style="min-width: 140px;">South Carolina<span style="color:#8E9196; font-size: 0.75rem; font-weight: 600; margin-left: 6px;">TBD</span></div><div class="consensus-bar"><div class="consensus-fill" style="width: 100%; background: #27455C;"></div></div><div class="consensus-pct" style="white-space: nowrap;">15/15 (100%)</div></div><div class="consensus-row" style="grid-template-columns: 140px 1fr 100px;"><div class="consensus-round" style="min-width: 140px;">UCLA<span style="color:#8E9196; font-size: 0.75rem; font-weight: 600; margin-left: 6px;">TBD</span></div><div class="consensus-bar"><div class="consensus-fill" style="width: 100%; background: #27455C;"></div></div><div class="consensus-pct" style="white-space: nowrap;">15/15 (100%)</div></div><div class="consensus-row" style="grid-template-columns: 140px 1fr 100px;"><div class="consensus-round" style="min-width: 140px;">LSU<span style="color:#346E4A; font-size: 0.75rem; font-weight: 600; margin-left: 6px;">&#10003; WON</span></div><div class="consensus-bar"><div class="consensus-fill" style="width: 93%; background: #346E4A;"></div></div><div class="consensus-pct" style="white-space: nowrap;">14/15 (93%)</div></div><div class="consensus-row" style="grid-template-columns: 140px 1fr 100px;"><div class="consensus-round" style="min-width: 140px;">Duke<span style="color:#346E4A; font-size: 0.75rem; font-weight: 600; margin-left: 6px;">&#10003; WON</span></div><div class="consensus-bar"><div class="consensus-fill" style="width: 93%; background: #346E4A;"></div></div><div class="consensus-pct" style="white-space: nowrap;">14/15 (93%)</div></div><div class="consensus-row" style="grid-template-columns: 140px 1fr 100px;"><div class="consensus-round" style="min-width: 140px;">Vanderbilt<span style="color:#8E9196; font-size: 0.75rem; font-weight: 600; margin-left: 6px;">TBD</span></div><div class="consensus-bar"><div class="consensus-fill" style="width: 93%; background: #27455C;"></div></div><div class="consensus-pct" style="white-space: nowrap;">14/15 (93%)</div></div><div class="consensus-row" style="grid-template-columns: 140px 1fr 100px;"><div class="consensus-round" style="min-width: 140px;">Iowa<span style="color:#8E9196; font-size: 0.75rem; font-weight: 600; margin-left: 6px;">TBD</span></div><div class="consensus-bar"><div class="consensus-fill" style="width: 87%; background: #27455C;"></div></div><div class="consensus-pct" style="white-space: nowrap;">13/15 (87%)</div></div><div class="consensus-row" style="grid-template-columns: 140px 1fr 100px;"><div class="consensus-round" style="min-width: 140px;">Minnesota<span style="color:#346E4A; font-size: 0.75rem; font-weight: 600; margin-left: 6px;">&#10003; WON</span></div><div class="consensus-bar"><div class="consensus-fill" style="width: 80%; background: #346E4A;"></div></div><div class="consensus-pct" style="white-space: nowrap;">12/15 (80%)</div></div><div class="consensus-row" style="grid-template-columns: 140px 1fr 100px;"><div class="consensus-round" style="min-width: 140px;">Louisville<span style="color:#8E9196; font-size: 0.75rem; font-weight: 600; margin-left: 6px;">TBD</span></div><div class="consensus-bar"><div class="consensus-fill" style="width: 80%; background: #27455C;"></div></div><div class="consensus-pct" style="white-space: nowrap;">12/15 (80%)</div></div><div class="consensus-row" style="grid-template-columns: 140px 1fr 100px;"><div class="consensus-round" style="min-width: 140px;">North Carolina<span style="color:#346E4A; font-size: 0.75rem; font-weight: 600; margin-left: 6px;">&#10003; WON</span></div><div class="consensus-bar"><div class="consensus-fill" style="width: 67%; background: #346E4A;"></div></div><div class="consensus-pct" style="white-space: nowrap;">10/15 (67%)</div></div><div class="consensus-row" style="grid-template-columns: 140px 1fr 100px;"><div class="consensus-round" style="min-width: 140px;">West Virginia<span style="color:#8E9196; font-size: 0.75rem; font-weight: 600; margin-left: 6px;">TBD</span></div><div class="consensus-bar"><div class="consensus-fill" style="width: 67%; background: #27455C;"></div></div><div class="consensus-pct" style="white-space: nowrap;">10/15 (67%)</div></div><div class="consensus-row" style="grid-template-columns: 140px 1fr 100px;"><div class="consensus-round" style="min-width: 140px;">Oklahoma<span style="color:#8E9196; font-size: 0.75rem; font-weight: 600; margin-left: 6px;">TBD</span></div><div class="consensus-bar"><div class="consensus-fill" style="width: 60%; background: #27455C;"></div></div><div class="consensus-pct" style="white-space: nowrap;">9/15 (60%)</div></div><div class="consensus-row" style="grid-template-columns: 140px 1fr 100px;"><div class="consensus-round" style="min-width: 140px;">Ohio State<span style="color:#8E9196; font-size: 0.75rem; font-weight: 600; margin-left: 6px;">TBD</span></div><div class="consensus-bar"><div class="consensus-fill" style="width: 60%; background: #27455C;"></div></div><div class="consensus-pct" style="white-space: nowrap;">9/15 (60%)</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 06: HEAD-TO-HEAD PICK SIMILARITY -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-number">06</div>
+        <h2>Top Brackets Range from 65% to 94% Similar — Average Overlap Is 81%</h2>
+      </div>
+      <div class="card full-width">
+        <div class="card-title">Top Brackets Range from 65% to 94% Similar — Average Overlap Is 81%</div>
+        <div style="overflow-x: auto;">
+          <div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; font-size: 0.75rem;"><tr><th style="padding: 8px; text-align: left; font-size: 0.75rem;"></th><th style="padding: 8px; text-align: center; font-size: 0.7rem; font-weight: 600; writing-mode: vertical-lr; transform: rotate(180deg); height: 80px;">Dany</th><th style="padding: 8px; text-align: center; font-size: 0.7rem; font-weight: 600; writing-mode: vertical-lr; transform: rotate(180deg); height: 80px;">Brian</th><th style="padding: 8px; text-align: center; font-size: 0.7rem; font-weight: 600; writing-mode: vertical-lr; transform: rotate(180deg); height: 80px;">Katie</th><th style="padding: 8px; text-align: center; font-size: 0.7rem; font-weight: 600; writing-mode: vertical-lr; transform: rotate(180deg); height: 80px;">Jeremy</th><th style="padding: 8px; text-align: center; font-size: 0.7rem; font-weight: 600; writing-mode: vertical-lr; transform: rotate(180deg); height: 80px;">Geordy</th><th style="padding: 8px; text-align: center; font-size: 0.7rem; font-weight: 600; writing-mode: vertical-lr; transform: rotate(180deg); height: 80px;">Michael</th><th style="padding: 8px; text-align: center; font-size: 0.7rem; font-weight: 600; writing-mode: vertical-lr; transform: rotate(180deg); height: 80px;">Timothy</th><th style="padding: 8px; text-align: center; font-size: 0.7rem; font-weight: 600; writing-mode: vertical-lr; transform: rotate(180deg); height: 80px;">Carlee</th><th style="padding: 8px; text-align: center; font-size: 0.7rem; font-weight: 600; writing-mode: vertical-lr; transform: rotate(180deg); height: 80px;">Taylor</th><th style="padding: 8px; text-align: center; font-size: 0.7rem; font-weight: 600; writing-mode: vertical-lr; transform: rotate(180deg); height: 80px;">Tim</th><th style="padding: 8px; text-align: center; font-size: 0.7rem; font-weight: 600; writing-mode: vertical-lr; transform: rotate(180deg); height: 80px;">Mark D.</th><th style="padding: 8px; text-align: center; font-size: 0.7rem; font-weight: 600; writing-mode: vertical-lr; transform: rotate(180deg); height: 80px;">Claire</th></tr><tr><td style="padding: 8px; font-weight: 600; white-space: nowrap;">Dany Kotlyar</td><td style="padding: 8px; text-align: center; background: #F8F3F0; color: #8E9196; font-weight: 600; border: 2px solid #FFFFFF;">—</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">94%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">83%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">92%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">87%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">83%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">89%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">84%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">81%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">83%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">83%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">73%</td></tr><tr><td style="padding: 8px; font-weight: 600; white-space: nowrap;">Brian Park</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">94%</td><td style="padding: 8px; text-align: center; background: #F8F3F0; color: #8E9196; font-weight: 600; border: 2px solid #FFFFFF;">—</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">89%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">90%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">84%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">83%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">89%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">83%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">76%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">86%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">81%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">75%</td></tr><tr><td style="padding: 8px; font-weight: 600; white-space: nowrap;">Katie Batkiewicz Byrne</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">83%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">89%</td><td style="padding: 8px; text-align: center; background: #F8F3F0; color: #8E9196; font-weight: 600; border: 2px solid #FFFFFF;">—</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">87%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">83%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">81%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">83%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">84%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">75%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">78%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">73%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">73%</td></tr><tr><td style="padding: 8px; font-weight: 600; white-space: nowrap;">Jeremy Garcia</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">92%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">90%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">87%</td><td style="padding: 8px; text-align: center; background: #F8F3F0; color: #8E9196; font-weight: 600; border: 2px solid #FFFFFF;">—</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">86%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">83%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">84%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">92%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">86%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">83%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">83%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">73%</td></tr><tr><td style="padding: 8px; font-weight: 600; white-space: nowrap;">Geordy Marget</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">87%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">84%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">83%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">86%</td><td style="padding: 8px; text-align: center; background: #F8F3F0; color: #8E9196; font-weight: 600; border: 2px solid #FFFFFF;">—</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">87%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">83%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">84%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">75%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">84%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">75%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">76%</td></tr><tr><td style="padding: 8px; font-weight: 600; white-space: nowrap;">Michael Perry</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">83%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">83%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">81%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">83%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">87%</td><td style="padding: 8px; text-align: center; background: #F8F3F0; color: #8E9196; font-weight: 600; border: 2px solid #FFFFFF;">—</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">79%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">84%</td><td style="padding: 8px; text-align: center; background: #D4A843; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">68%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">81%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">75%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">79%</td></tr><tr><td style="padding: 8px; font-weight: 600; white-space: nowrap;">Timothy King</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">89%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">89%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">83%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">84%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">83%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">79%</td><td style="padding: 8px; text-align: center; background: #F8F3F0; color: #8E9196; font-weight: 600; border: 2px solid #FFFFFF;">—</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">79%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">76%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">79%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">81%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">75%</td></tr><tr><td style="padding: 8px; font-weight: 600; white-space: nowrap;">Carlee Constable</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">84%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">83%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">84%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">92%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">84%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">84%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">79%</td><td style="padding: 8px; text-align: center; background: #F8F3F0; color: #8E9196; font-weight: 600; border: 2px solid #FFFFFF;">—</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">81%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">78%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">75%</td><td style="padding: 8px; text-align: center; background: #D4A843; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">71%</td></tr><tr><td style="padding: 8px; font-weight: 600; white-space: nowrap;">Taylor Duran</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">81%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">76%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">75%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">86%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">75%</td><td style="padding: 8px; text-align: center; background: #D4A843; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">68%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">76%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">81%</td><td style="padding: 8px; text-align: center; background: #F8F3F0; color: #8E9196; font-weight: 600; border: 2px solid #FFFFFF;">—</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">75%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">81%</td><td style="padding: 8px; text-align: center; background: #9E7B5A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">65%</td></tr><tr><td style="padding: 8px; font-weight: 600; white-space: nowrap;">Tim Ulaszek</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">83%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">86%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">78%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">83%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">84%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">81%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">79%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">78%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">75%</td><td style="padding: 8px; text-align: center; background: #F8F3F0; color: #8E9196; font-weight: 600; border: 2px solid #FFFFFF;">—</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">83%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">73%</td></tr><tr><td style="padding: 8px; font-weight: 600; white-space: nowrap;">Mark DeMoss</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">83%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">81%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">73%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">83%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">75%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">75%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">81%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">75%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">81%</td><td style="padding: 8px; text-align: center; background: #346E4A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">83%</td><td style="padding: 8px; text-align: center; background: #F8F3F0; color: #8E9196; font-weight: 600; border: 2px solid #FFFFFF;">—</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">78%</td></tr><tr><td style="padding: 8px; font-weight: 600; white-space: nowrap;">Claire Dieckgraeff</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">73%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">75%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">73%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">73%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">76%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">79%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">75%</td><td style="padding: 8px; text-align: center; background: #D4A843; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">71%</td><td style="padding: 8px; text-align: center; background: #9E7B5A; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">65%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">73%</td><td style="padding: 8px; text-align: center; background: #76B729; color: #FFFFFF; font-weight: 600; border: 2px solid #FFFFFF;">78%</td><td style="padding: 8px; text-align: center; background: #F8F3F0; color: #8E9196; font-weight: 600; border: 2px solid #FFFFFF;">—</td></tr></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 07: BRACKET QUALITY ASSESSMENT -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-number">07</div>
+        <h2>Bracket Quality Assessment</h2>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Dany Kotlyar Is Converting 21% of Max Potential — Most Efficient Bracket</div>
+          <div class="small-chart">
+            <canvas id="skillLuckChart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Dany Kotlyar Ranks in the 95.7th National Percentile</div>
+          <div style="font-size: 0.85rem; color: #8E9196; margin-bottom: 15px;">Each bracket's national ranking among all ESPN entries</div>
+          <div style="padding: 10px 0;"><div style="display: grid; grid-template-columns: 150px 1fr 80px; gap: 10px; align-items: center; margin-bottom: 6px; padding: 6px 12px; background: #FFFFFF; border-radius: 2px;"><div style="font-weight: 600; font-size: 0.85rem;">Dany Kotlyar</div><div style="width: 100%; height: 8px; background: #E5E0DC; border-radius: 2px;"><div style="width: 95.7%; height: 100%; background: #346E4A; border-radius: 2px;"></div></div><div style="font-weight: 700; font-size: 0.85rem; text-align: right;">95.7%</div></div><div style="display: grid; grid-template-columns: 150px 1fr 80px; gap: 10px; align-items: center; margin-bottom: 6px; padding: 6px 12px; background: #FFFFFF; border-radius: 2px;"><div style="font-weight: 600; font-size: 0.85rem;">Brian Park</div><div style="width: 100%; height: 8px; background: #E5E0DC; border-radius: 2px;"><div style="width: 95.7%; height: 100%; background: #346E4A; border-radius: 2px;"></div></div><div style="font-weight: 700; font-size: 0.85rem; text-align: right;">95.7%</div></div><div style="display: grid; grid-template-columns: 150px 1fr 80px; gap: 10px; align-items: center; margin-bottom: 6px; padding: 6px 12px; background: #FFFFFF; border-radius: 2px;"><div style="font-weight: 600; font-size: 0.85rem;">Katie Batkiewicz Byrne</div><div style="width: 100%; height: 8px; background: #E5E0DC; border-radius: 2px;"><div style="width: 95.7%; height: 100%; background: #346E4A; border-radius: 2px;"></div></div><div style="font-weight: 700; font-size: 0.85rem; text-align: right;">95.7%</div></div><div style="display: grid; grid-template-columns: 150px 1fr 80px; gap: 10px; align-items: center; margin-bottom: 6px; padding: 6px 12px; background: #FFFFFF; border-radius: 2px;"><div style="font-weight: 600; font-size: 0.85rem;">Jeremy Garcia</div><div style="width: 100%; height: 8px; background: #E5E0DC; border-radius: 2px;"><div style="width: 95.7%; height: 100%; background: #346E4A; border-radius: 2px;"></div></div><div style="font-weight: 700; font-size: 0.85rem; text-align: right;">95.7%</div></div><div style="display: grid; grid-template-columns: 150px 1fr 80px; gap: 10px; align-items: center; margin-bottom: 6px; padding: 6px 12px; background: #FFFFFF; border-radius: 2px;"><div style="font-weight: 600; font-size: 0.85rem;">Geordy Marget</div><div style="width: 100%; height: 8px; background: #E5E0DC; border-radius: 2px;"><div style="width: 87.2%; height: 100%; background: #76B729; border-radius: 2px;"></div></div><div style="font-weight: 700; font-size: 0.85rem; text-align: right;">87.2%</div></div><div style="display: grid; grid-template-columns: 150px 1fr 80px; gap: 10px; align-items: center; margin-bottom: 6px; padding: 6px 12px; background: #FFFFFF; border-radius: 2px;"><div style="font-weight: 600; font-size: 0.85rem;">Michael Perry</div><div style="width: 100%; height: 8px; background: #E5E0DC; border-radius: 2px;"><div style="width: 81.5%; height: 100%; background: #76B729; border-radius: 2px;"></div></div><div style="font-weight: 700; font-size: 0.85rem; text-align: right;">81.5%</div></div><div style="display: grid; grid-template-columns: 150px 1fr 80px; gap: 10px; align-items: center; margin-bottom: 6px; padding: 6px 12px; background: #FFFFFF; border-radius: 2px;"><div style="font-weight: 600; font-size: 0.85rem;">Timothy King</div><div style="width: 100%; height: 8px; background: #E5E0DC; border-radius: 2px;"><div style="width: 81.5%; height: 100%; background: #76B729; border-radius: 2px;"></div></div><div style="font-weight: 700; font-size: 0.85rem; text-align: right;">81.5%</div></div><div style="display: grid; grid-template-columns: 150px 1fr 80px; gap: 10px; align-items: center; margin-bottom: 6px; padding: 6px 12px; background: #FFFFFF; border-radius: 2px;"><div style="font-weight: 600; font-size: 0.85rem;">Carlee Constable</div><div style="width: 100%; height: 8px; background: #E5E0DC; border-radius: 2px;"><div style="width: 73%; height: 100%; background: #76B729; border-radius: 2px;"></div></div><div style="font-weight: 700; font-size: 0.85rem; text-align: right;">73.0%</div></div><div style="display: grid; grid-template-columns: 150px 1fr 80px; gap: 10px; align-items: center; margin-bottom: 6px; padding: 6px 12px; background: #FFFFFF; border-radius: 2px;"><div style="font-weight: 600; font-size: 0.85rem;">Taylor Duran</div><div style="width: 100%; height: 8px; background: #E5E0DC; border-radius: 2px;"><div style="width: 63.3%; height: 100%; background: #D4A843; border-radius: 2px;"></div></div><div style="font-weight: 700; font-size: 0.85rem; text-align: right;">63.3%</div></div><div style="display: grid; grid-template-columns: 150px 1fr 80px; gap: 10px; align-items: center; margin-bottom: 6px; padding: 6px 12px; background: #FFFFFF; border-radius: 2px;"><div style="font-weight: 600; font-size: 0.85rem;">Tim Ulaszek</div><div style="width: 100%; height: 8px; background: #E5E0DC; border-radius: 2px;"><div style="width: 63.3%; height: 100%; background: #D4A843; border-radius: 2px;"></div></div><div style="font-weight: 700; font-size: 0.85rem; text-align: right;">63.3%</div></div><div style="display: grid; grid-template-columns: 150px 1fr 80px; gap: 10px; align-items: center; margin-bottom: 6px; padding: 6px 12px; background: #FFFFFF; border-radius: 2px;"><div style="font-weight: 600; font-size: 0.85rem;">Mark DeMoss</div><div style="width: 100%; height: 8px; background: #E5E0DC; border-radius: 2px;"><div style="width: 44.4%; height: 100%; background: #DC1A41; border-radius: 2px;"></div></div><div style="font-weight: 700; font-size: 0.85rem; text-align: right;">44.4%</div></div><div style="display: grid; grid-template-columns: 150px 1fr 80px; gap: 10px; align-items: center; margin-bottom: 6px; padding: 6px 12px; background: #FFFFFF; border-radius: 2px;"><div style="font-weight: 600; font-size: 0.85rem;">Claire Dieckgraeff</div><div style="width: 100%; height: 8px; background: #E5E0DC; border-radius: 2px;"><div style="width: 44.4%; height: 100%; background: #DC1A41; border-radius: 2px;"></div></div><div style="font-weight: 700; font-size: 0.85rem; text-align: right;">44.4%</div></div><div style="display: grid; grid-template-columns: 150px 1fr 80px; gap: 10px; align-items: center; margin-bottom: 6px; padding: 6px 12px; background: #FFFFFF; border-radius: 2px;"><div style="font-weight: 600; font-size: 0.85rem;">Mark Neary</div><div style="width: 100%; height: 8px; background: #E5E0DC; border-radius: 2px;"><div style="width: 35.1%; height: 100%; background: #DC1A41; border-radius: 2px;"></div></div><div style="font-weight: 700; font-size: 0.85rem; text-align: right;">35.1%</div></div><div style="display: grid; grid-template-columns: 150px 1fr 80px; gap: 10px; align-items: center; margin-bottom: 6px; padding: 6px 12px; background: #FFFFFF; border-radius: 2px;"><div style="font-weight: 600; font-size: 0.85rem;">Caitlin King</div><div style="width: 100%; height: 8px; background: #E5E0DC; border-radius: 2px;"><div style="width: 28.7%; height: 100%; background: #DC1A41; border-radius: 2px;"></div></div><div style="font-weight: 700; font-size: 0.85rem; text-align: right;">28.7%</div></div><div style="display: grid; grid-template-columns: 150px 1fr 80px; gap: 10px; align-items: center; margin-bottom: 6px; padding: 6px 12px; background: #FFFFFF; border-radius: 2px;"><div style="font-weight: 600; font-size: 0.85rem;">Christopher Lee</div><div style="width: 100%; height: 8px; background: #E5E0DC; border-radius: 2px;"><div style="width: 19.8%; height: 100%; background: #DC1A41; border-radius: 2px;"></div></div><div style="font-weight: 700; font-size: 0.85rem; text-align: right;">19.8%</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 08: MOMENTUM & TREND ANALYSIS -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-number">08</div>
+        <h2>Dany Kotlyar R32 Accuracy Is 16% Above the Group Average</h2>
+      </div>
+      <div class="card full-width">
+        <div class="card-title">Round-over-Round Momentum</div>
+        <div style="font-size: 0.85rem; color: #8E9196; margin-bottom: 15px;">R64 accuracy = correct picks / 32 games. R32 accuracy = correct picks / decided R32 games (excludes games not yet played). Trend = R32 accuracy vs group average (84%).</div>
+        <div class="table-container">
+          <table>
+            <tr><th>Rank</th><th>Player</th><th>R64 Acc.</th><th>R32 Acc.</th><th>vs Group Avg</th></tr>
+            <tr><td><strong>1</strong></td><td>Dany Kotlyar</td><td>91%</td><td>100%</td><td style="color:#346E4A; font-weight: 700;">&#9650; +16%</td></tr><tr><td><strong>2</strong></td><td>Brian Park</td><td>91%</td><td>100%</td><td style="color:#346E4A; font-weight: 700;">&#9650; +16%</td></tr><tr><td><strong>3</strong></td><td>Katie Batkiewicz Byrne</td><td>91%</td><td>100%</td><td style="color:#346E4A; font-weight: 700;">&#9650; +16%</td></tr><tr><td><strong>4</strong></td><td>Jeremy Garcia</td><td>91%</td><td>100%</td><td style="color:#346E4A; font-weight: 700;">&#9650; +16%</td></tr><tr><td><strong>5</strong></td><td>Geordy Marget</td><td>88%</td><td>100%</td><td style="color:#346E4A; font-weight: 700;">&#9650; +16%</td></tr><tr><td><strong>6</strong></td><td>Timothy King</td><td>84%</td><td>100%</td><td style="color:#346E4A; font-weight: 700;">&#9650; +16%</td></tr><tr><td><strong>7</strong></td><td>Tim Ulaszek</td><td>78%</td><td>100%</td><td style="color:#346E4A; font-weight: 700;">&#9650; +16%</td></tr><tr><td><strong>8</strong></td><td>Mark DeMoss</td><td>72%</td><td>100%</td><td style="color:#346E4A; font-weight: 700;">&#9650; +16%</td></tr><tr><td><strong>9</strong></td><td>Michael Perry</td><td>91%</td><td>80%</td><td style="color:#DC1A41; font-weight: 700;">&#9660; -4%</td></tr><tr><td><strong>10</strong></td><td>Carlee Constable</td><td>88%</td><td>80%</td><td style="color:#DC1A41; font-weight: 700;">&#9660; -4%</td></tr><tr><td><strong>11</strong></td><td>Taylor Duran</td><td>84%</td><td>80%</td><td style="color:#DC1A41; font-weight: 700;">&#9660; -4%</td></tr><tr><td><strong>12</strong></td><td>Claire Dieckgraeff</td><td>78%</td><td>67%</td><td style="color:#DC1A41; font-weight: 700;">&#9660; -17%</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 09: CHALK SCORE & BRACKET UNIQUENESS -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-number">09</div>
+        <h2>Brian Park Plays It Safest at 77% Chalk — Christopher Lee Is the Wild Card at 37% Unique</h2>
+      </div>
+      <div class="card full-width">
+        <div class="card-title">Chalk vs Uniqueness — Dot = Champion Pick</div>
+        <div style="position: relative; height: 600px; margin-bottom: 20px;">
+          <canvas id="chalkUniquenessChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 10: UPSET APPETITE -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-number">10</div>
+        <h2>Favorites vs Underdogs — Who's Taking the Contrarian Path?</h2>
+      </div>
+      <div class="card full-width">
+        <div class="chart-container">
+          <canvas id="upsetAppetiteChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 11: CHAMPION RISK -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-number">11</div>
+        <h2>Champion Dependency — How Much Ceiling Rests on One Pick?</h2>
+      </div>
+      <div class="card full-width">
+        <div style="padding: 10px 0;"><div style="display: grid; grid-template-columns: 150px 120px 1fr 60px; gap: 10px; align-items: center; margin-bottom: 8px; padding: 10px 12px; background: #FFFFFF; border-radius: 2px;"><div style="font-weight: 600; font-size: 0.85rem;">Carlee Constable</div><div style="font-size: 0.8rem; color: #7A7672;">South Carolina</div><div style="width: 100%; height: 8px; background: #E5E0DC; border-radius: 2px;"><div style="width: 22%; height: 100%; background: #D4A843; border-radius: 2px;"></div></div><div style="font-weight: 700; font-size: 0.85rem; text-align: right;">22%</div></div><div style="display: grid; grid-template-columns: 150px 120px 1fr 60px; gap: 10px; align-items: center; margin-bottom: 8px; padding: 10px 12px; background: #FFFFFF; border-radius: 2px;"><div style="font-weight: 600; font-size: 0.85rem;">Claire Dieckgraeff</div><div style="font-size: 0.8rem; color: #7A7672;">UConn</div><div style="width: 100%; height: 8px; background: #E5E0DC; border-radius: 2px;"><div style="width: 22%; height: 100%; background: #D4A843; border-radius: 2px;"></div></div><div style="font-weight: 700; font-size: 0.85rem; text-align: right;">22%</div></div><div style="display: grid; grid-template-columns: 150px 120px 1fr 60px; gap: 10px; align-items: center; margin-bottom: 8px; padding: 10px 12px; background: #FFFFFF; border-radius: 2px;"><div style="font-weight: 600; font-size: 0.85rem;">Caitlin King</div><div style="font-size: 0.8rem; color: #7A7672;">LSU</div><div style="width: 100%; height: 8px; background: #E5E0DC; border-radius: 2px;"><div style="width: 22%; height: 100%; background: #D4A843; border-radius: 2px;"></div></div><div style="font-weight: 700; font-size: 0.85rem; text-align: right;">22%</div></div><div style="display: grid; grid-template-columns: 150px 120px 1fr 60px; gap: 10px; align-items: center; margin-bottom: 8px; padding: 10px 12px; background: #FFFFFF; border-radius: 2px;"><div style="font-weight: 600; font-size: 0.85rem;">Christopher Lee</div><div style="font-size: 0.8rem; color: #7A7672;">Michigan</div><div style="width: 100%; height: 8px; background: #E5E0DC; border-radius: 2px;"><div style="width: 22%; height: 100%; background: #D4A843; border-radius: 2px;"></div></div><div style="font-weight: 700; font-size: 0.85rem; text-align: right;">22%</div></div><div style="display: grid; grid-template-columns: 150px 120px 1fr 60px; gap: 10px; align-items: center; margin-bottom: 8px; padding: 10px 12px; background: #FFFFFF; border-radius: 2px;"><div style="font-weight: 600; font-size: 0.85rem;">Dany Kotlyar</div><div style="font-size: 0.8rem; color: #7A7672;">UConn</div><div style="width: 100%; height: 8px; background: #E5E0DC; border-radius: 2px;"><div style="width: 21%; height: 100%; background: #346E4A; border-radius: 2px;"></div></div><div style="font-weight: 700; font-size: 0.85rem; text-align: right;">21%</div></div><div style="display: grid; grid-template-columns: 150px 120px 1fr 60px; gap: 10px; align-items: center; margin-bottom: 8px; padding: 10px 12px; background: #FFFFFF; border-radius: 2px;"><div style="font-weight: 600; font-size: 0.85rem;">Brian Park</div><div style="font-size: 0.8rem; color: #7A7672;">UConn</div><div style="width: 100%; height: 8px; background: #E5E0DC; border-radius: 2px;"><div style="width: 21%; height: 100%; background: #346E4A; border-radius: 2px;"></div></div><div style="font-weight: 700; font-size: 0.85rem; text-align: right;">21%</div></div><div style="display: grid; grid-template-columns: 150px 120px 1fr 60px; gap: 10px; align-items: center; margin-bottom: 8px; padding: 10px 12px; background: #FFFFFF; border-radius: 2px;"><div style="font-weight: 600; font-size: 0.85rem;">Katie Batkiewicz Byrne</div><div style="font-size: 0.8rem; color: #7A7672;">LSU</div><div style="width: 100%; height: 8px; background: #E5E0DC; border-radius: 2px;"><div style="width: 21%; height: 100%; background: #346E4A; border-radius: 2px;"></div></div><div style="font-weight: 700; font-size: 0.85rem; text-align: right;">21%</div></div><div style="display: grid; grid-template-columns: 150px 120px 1fr 60px; gap: 10px; align-items: center; margin-bottom: 8px; padding: 10px 12px; background: #FFFFFF; border-radius: 2px;"><div style="font-weight: 600; font-size: 0.85rem;">Jeremy Garcia</div><div style="font-size: 0.8rem; color: #7A7672;">South Carolina</div><div style="width: 100%; height: 8px; background: #E5E0DC; border-radius: 2px;"><div style="width: 21%; height: 100%; background: #346E4A; border-radius: 2px;"></div></div><div style="font-weight: 700; font-size: 0.85rem; text-align: right;">21%</div></div><div style="display: grid; grid-template-columns: 150px 120px 1fr 60px; gap: 10px; align-items: center; margin-bottom: 8px; padding: 10px 12px; background: #FFFFFF; border-radius: 2px;"><div style="font-weight: 600; font-size: 0.85rem;">Geordy Marget</div><div style="font-size: 0.8rem; color: #7A7672;">UConn</div><div style="width: 100%; height: 8px; background: #E5E0DC; border-radius: 2px;"><div style="width: 21%; height: 100%; background: #346E4A; border-radius: 2px;"></div></div><div style="font-weight: 700; font-size: 0.85rem; text-align: right;">21%</div></div><div style="display: grid; grid-template-columns: 150px 120px 1fr 60px; gap: 10px; align-items: center; margin-bottom: 8px; padding: 10px 12px; background: #FFFFFF; border-radius: 2px;"><div style="font-weight: 600; font-size: 0.85rem;">Michael Perry</div><div style="font-size: 0.8rem; color: #7A7672;">UConn</div><div style="width: 100%; height: 8px; background: #E5E0DC; border-radius: 2px;"><div style="width: 21%; height: 100%; background: #346E4A; border-radius: 2px;"></div></div><div style="font-weight: 700; font-size: 0.85rem; text-align: right;">21%</div></div><div style="display: grid; grid-template-columns: 150px 120px 1fr 60px; gap: 10px; align-items: center; margin-bottom: 8px; padding: 10px 12px; background: #FFFFFF; border-radius: 2px;"><div style="font-weight: 600; font-size: 0.85rem;">Timothy King</div><div style="font-size: 0.8rem; color: #7A7672;">UConn</div><div style="width: 100%; height: 8px; background: #E5E0DC; border-radius: 2px;"><div style="width: 21%; height: 100%; background: #346E4A; border-radius: 2px;"></div></div><div style="font-weight: 700; font-size: 0.85rem; text-align: right;">21%</div></div><div style="display: grid; grid-template-columns: 150px 120px 1fr 60px; gap: 10px; align-items: center; margin-bottom: 8px; padding: 10px 12px; background: #FFFFFF; border-radius: 2px;"><div style="font-weight: 600; font-size: 0.85rem;">Taylor Duran</div><div style="font-size: 0.8rem; color: #7A7672;">South Carolina</div><div style="width: 100%; height: 8px; background: #E5E0DC; border-radius: 2px;"><div style="width: 21%; height: 100%; background: #346E4A; border-radius: 2px;"></div></div><div style="font-weight: 700; font-size: 0.85rem; text-align: right;">21%</div></div></div>
+      </div>
+    </div>
+
+    <!-- SECTION 12: SWING GAMES -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-number">12</div>
+        <h2>Texas vs ? Is the Biggest Swing Game for the Group</h2>
+      </div>
+      <div class="card full-width">
+        <div style="padding: 10px 0;"><div style="background: #FFFFFF; padding: 16px; border-radius: 4px; margin-bottom: 12px;"><div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 10px; color: #30302E;">Texas <span style="color: #8E9196; font-weight: 400;">(15 picks at stake)</span></div><div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;"><div style="min-width: 100px; font-weight: 600; font-size: 0.85rem;">Texas</div><div style="flex: 1; height: 20px; background: #E5E0DC; border-radius: 2px; overflow: hidden;"><div style="width: 100%; height: 100%; background: #27455C; border-radius: 2px;"></div></div><div style="min-width: 40px; font-weight: 700; font-size: 0.85rem; text-align: right;">15</div></div></div><div style="background: #FFFFFF; padding: 16px; border-radius: 4px; margin-bottom: 12px;"><div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 10px; color: #30302E;">Oklahoma vs Michigan St <span style="color: #8E9196; font-weight: 400;">(15 picks at stake)</span></div><div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;"><div style="min-width: 100px; font-weight: 600; font-size: 0.85rem;">Oklahoma</div><div style="flex: 1; height: 20px; background: #E5E0DC; border-radius: 2px; overflow: hidden;"><div style="width: 60%; height: 100%; background: #27455C; border-radius: 2px;"></div></div><div style="min-width: 40px; font-weight: 700; font-size: 0.85rem; text-align: right;">9</div></div><div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;"><div style="min-width: 100px; font-weight: 600; font-size: 0.85rem;">Michigan St</div><div style="flex: 1; height: 20px; background: #E5E0DC; border-radius: 2px; overflow: hidden;"><div style="width: 40%; height: 100%; background: #27455C; border-radius: 2px;"></div></div><div style="min-width: 40px; font-weight: 700; font-size: 0.85rem; text-align: right;">6</div></div></div><div style="background: #FFFFFF; padding: 16px; border-radius: 4px; margin-bottom: 12px;"><div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 10px; color: #30302E;">TCU <span style="color: #8E9196; font-weight: 400;">(15 picks at stake)</span></div><div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;"><div style="min-width: 100px; font-weight: 600; font-size: 0.85rem;">TCU</div><div style="flex: 1; height: 20px; background: #E5E0DC; border-radius: 2px; overflow: hidden;"><div style="width: 100%; height: 100%; background: #27455C; border-radius: 2px;"></div></div><div style="min-width: 40px; font-weight: 700; font-size: 0.85rem; text-align: right;">15</div></div></div><div style="background: #FFFFFF; padding: 16px; border-radius: 4px; margin-bottom: 12px;"><div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 10px; color: #30302E;">Louisville vs Alabama <span style="color: #8E9196; font-weight: 400;">(15 picks at stake)</span></div><div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;"><div style="min-width: 100px; font-weight: 600; font-size: 0.85rem;">Louisville</div><div style="flex: 1; height: 20px; background: #E5E0DC; border-radius: 2px; overflow: hidden;"><div style="width: 80%; height: 100%; background: #27455C; border-radius: 2px;"></div></div><div style="min-width: 40px; font-weight: 700; font-size: 0.85rem; text-align: right;">12</div></div><div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;"><div style="min-width: 100px; font-weight: 600; font-size: 0.85rem;">Alabama</div><div style="flex: 1; height: 20px; background: #E5E0DC; border-radius: 2px; overflow: hidden;"><div style="width: 20%; height: 100%; background: #27455C; border-radius: 2px;"></div></div><div style="min-width: 40px; font-weight: 700; font-size: 0.85rem; text-align: right;">3</div></div></div><div style="background: #FFFFFF; padding: 16px; border-radius: 4px; margin-bottom: 12px;"><div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 10px; color: #30302E;">Ohio State vs Notre Dame <span style="color: #8E9196; font-weight: 400;">(15 picks at stake)</span></div><div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;"><div style="min-width: 100px; font-weight: 600; font-size: 0.85rem;">Ohio State</div><div style="flex: 1; height: 20px; background: #E5E0DC; border-radius: 2px; overflow: hidden;"><div style="width: 60%; height: 100%; background: #27455C; border-radius: 2px;"></div></div><div style="min-width: 40px; font-weight: 700; font-size: 0.85rem; text-align: right;">9</div></div><div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;"><div style="min-width: 100px; font-weight: 600; font-size: 0.85rem;">Notre Dame</div><div style="flex: 1; height: 20px; background: #E5E0DC; border-radius: 2px; overflow: hidden;"><div style="width: 40%; height: 100%; background: #27455C; border-radius: 2px;"></div></div><div style="min-width: 40px; font-weight: 700; font-size: 0.85rem; text-align: right;">6</div></div></div><div style="background: #FFFFFF; padding: 16px; border-radius: 4px; margin-bottom: 12px;"><div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 10px; color: #30302E;">West Virginia vs Kentucky <span style="color: #8E9196; font-weight: 400;">(15 picks at stake)</span></div><div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;"><div style="min-width: 100px; font-weight: 600; font-size: 0.85rem;">West Virginia</div><div style="flex: 1; height: 20px; background: #E5E0DC; border-radius: 2px; overflow: hidden;"><div style="width: 67%; height: 100%; background: #27455C; border-radius: 2px;"></div></div><div style="min-width: 40px; font-weight: 700; font-size: 0.85rem; text-align: right;">10</div></div><div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;"><div style="min-width: 100px; font-weight: 600; font-size: 0.85rem;">Kentucky</div><div style="flex: 1; height: 20px; background: #E5E0DC; border-radius: 2px; overflow: hidden;"><div style="width: 33%; height: 100%; background: #27455C; border-radius: 2px;"></div></div><div style="min-width: 40px; font-weight: 700; font-size: 0.85rem; text-align: right;">5</div></div></div></div>
+      </div>
+    </div>
+
+    <!-- SECTION 13: ELIMINATION TRACKER -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-number">13</div>
+        <h2>15 of 15 Brackets Still Have a Path to Win</h2>
+      </div>
+      <div class="card full-width">
+        <div class="summary-row">
+          <div class="summary-stat">
+            <div class="summary-number">15</div>
+            <div class="summary-label">Contending</div>
+          </div>
+          <div class="summary-stat">
+            <div class="summary-number">0</div>
+            <div class="summary-label">Eliminated</div>
+          </div>
+          <div class="summary-stat">
+            <div class="summary-number">1848</div>
+            <div class="summary-label">Avg Max Possible</div>
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="eliminationChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 14: LIVE SCOREBOARD -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-number">14</div>
+        <h2>Current Round Results</h2>
+      </div>
+      <div class="card full-width">
+        <div class="grid-3">
+          <div class="game-card"><div class="game-teams"><div class="team-info"><div class="team-name">(1) Texas Longhorns</div><div class="team-score">15</div></div><div class="vs-text">vs</div><div class="team-info"><div class="team-name">(8) Oregon Ducks</div><div class="team-score">15</div></div></div><div class="game-status">4:13 - 1st Quarter</div></div><div class="game-card"><div class="game-teams"><div class="team-info"><div class="team-name">(2) Michigan Wolverines</div><div class="team-score">92</div></div><div class="vs-text">vs</div><div class="team-info"><div class="team-name">(7) NC State Wolfpack</div><div class="team-score">63</div></div></div><div class="game-status">Final</div></div><div class="game-card"><div class="game-teams"><div class="team-info"><div class="team-name">(2) LSU Tigers</div><div class="team-score">101</div></div><div class="vs-text">vs</div><div class="team-info"><div class="team-name">(7) Texas Tech Lady Raiders</div><div class="team-score">47</div></div></div><div class="game-status">Final</div></div><div class="game-card"><div class="game-teams"><div class="team-info"><div class="team-name">(3) Duke Blue Devils</div><div class="team-score">69</div></div><div class="vs-text">vs</div><div class="team-info"><div class="team-name">(6) Baylor Bears</div><div class="team-score">46</div></div></div><div class="game-status">Final</div></div><div class="game-card"><div class="game-teams"><div class="team-info"><div class="team-name">(4) North Carolina Tar Heels</div><div class="team-score">74</div></div><div class="vs-text">vs</div><div class="team-info"><div class="team-name">(5) Maryland Terrapins</div><div class="team-score">66</div></div></div><div class="game-status">Final</div></div><div class="game-card"><div class="game-teams"><div class="team-info"><div class="team-name">(4) Minnesota Golden Gophers</div><div class="team-score">65</div></div><div class="vs-text">vs</div><div class="team-info"><div class="team-name">(5) Ole Miss Rebels</div><div class="team-score">63</div></div></div><div class="game-status">Final</div></div><div class="game-card"><div class="game-teams"><div class="team-info"><div class="team-name">(4) Oklahoma Sooners</div><div class="team-score">0</div></div><div class="vs-text">vs</div><div class="team-info"><div class="team-name">(5) Michigan State Spartans</div><div class="team-score">0</div></div></div><div class="game-status">Sun, March 22nd at 8:00 PM EDT</div></div><div class="game-card"><div class="game-teams"><div class="team-info"><div class="team-name">(3) TCU Horned Frogs</div><div class="team-score">0</div></div><div class="vs-text">vs</div><div class="team-info"><div class="team-name">(6) Washington Huskies</div><div class="team-score">0</div></div></div><div class="game-status">Sun, March 22nd at 10:00 PM EDT</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 15: FULL LEADERBOARD -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-number">15</div>
+        <h2>Complete Standings — 15 Brackets</h2>
+      </div>
+      <div class="card full-width">
+        <div style="margin-bottom: 20px;">
+          <input type="text" id="searchInput" placeholder="Search by player name..." style="width: 100%; padding: 12px; border: 1px solid #E5E0DC; border-radius: 4px; font-family: 'Inter', sans-serif;">
+        </div>
+        <div class="table-container">
+          <div class="leaderboard-header">
+            <div>Rank</div>
+            <div>Player</div>
+            <div>Pts</div>
+            <div>Max</div>
+            <div>Efficiency</div>
+            <div>Record</div>
+            <div>R64</div>
+            <div>R32</div>
+            <div>S16</div>
+            <div>E8</div>
+            <div>F4</div>
+            <div>Champ</div>
+            <div>Status</div>
+          </div>
+          <div id="leaderboardRows">
+            <div class="leaderboard-row leader-row" data-name="dany kotlyar"><div>&#x1F947;</div><div>Dany Kotlyar</div><div><strong>390</strong></div><div>1890</div><div><div style="font-size: 0.8rem;"><strong>21%</strong></div><div class="efficiency-bar"><div class="efficiency-fill" style="width: 21%"></div></div></div><div>34-3</div><div>290</div><div>100</div><div>0</div><div>0</div><div>0</div><div>UConn</div><div><span class="status-alive">&#x25CF;</span></div></div><div class="leaderboard-row" data-name="brian park"><div>&#x1F948;</div><div>Brian Park</div><div><strong>390</strong></div><div>1890</div><div><div style="font-size: 0.8rem;"><strong>21%</strong></div><div class="efficiency-bar"><div class="efficiency-fill" style="width: 21%"></div></div></div><div>34-3</div><div>290</div><div>100</div><div>0</div><div>0</div><div>0</div><div>UConn</div><div><span class="status-alive">&#x25CF;</span></div></div><div class="leaderboard-row" data-name="katie batkiewicz byrne"><div>&#x1F949;</div><div>Katie Batkiewicz Byrne</div><div><strong>390</strong></div><div>1890</div><div><div style="font-size: 0.8rem;"><strong>21%</strong></div><div class="efficiency-bar"><div class="efficiency-fill" style="width: 21%"></div></div></div><div>34-3</div><div>290</div><div>100</div><div>0</div><div>0</div><div>0</div><div>LSU</div><div><span class="status-alive">&#x25CF;</span></div></div><div class="leaderboard-row" data-name="jeremy garcia"><div>4</div><div>Jeremy Garcia</div><div><strong>390</strong></div><div>1890</div><div><div style="font-size: 0.8rem;"><strong>21%</strong></div><div class="efficiency-bar"><div class="efficiency-fill" style="width: 21%"></div></div></div><div>34-3</div><div>290</div><div>100</div><div>0</div><div>0</div><div>0</div><div>South Carolina</div><div><span class="status-alive">&#x25CF;</span></div></div><div class="leaderboard-row" data-name="geordy marget"><div>5</div><div>Geordy Marget</div><div><strong>380</strong></div><div>1880</div><div><div style="font-size: 0.8rem;"><strong>20%</strong></div><div class="efficiency-bar"><div class="efficiency-fill" style="width: 20%"></div></div></div><div>33-4</div><div>280</div><div>100</div><div>0</div><div>0</div><div>0</div><div>UConn</div><div><span class="status-alive">&#x25CF;</span></div></div><div class="leaderboard-row" data-name="michael perry"><div>6</div><div>Michael Perry</div><div><strong>370</strong></div><div>1870</div><div><div style="font-size: 0.8rem;"><strong>20%</strong></div><div class="efficiency-bar"><div class="efficiency-fill" style="width: 20%"></div></div></div><div>33-4</div><div>290</div><div>80</div><div>0</div><div>0</div><div>0</div><div>UConn</div><div><span class="status-alive">&#x25CF;</span></div></div><div class="leaderboard-row" data-name="timothy king"><div>7</div><div>Timothy King</div><div><strong>370</strong></div><div>1870</div><div><div style="font-size: 0.8rem;"><strong>20%</strong></div><div class="efficiency-bar"><div class="efficiency-fill" style="width: 20%"></div></div></div><div>32-5</div><div>270</div><div>100</div><div>0</div><div>0</div><div>0</div><div>UConn</div><div><span class="status-alive">&#x25CF;</span></div></div><div class="leaderboard-row" data-name="carlee constable"><div>8</div><div>Carlee Constable</div><div><strong>360</strong></div><div>1820</div><div><div style="font-size: 0.8rem;"><strong>20%</strong></div><div class="efficiency-bar"><div class="efficiency-fill" style="width: 20%"></div></div></div><div>32-6</div><div>280</div><div>80</div><div>0</div><div>0</div><div>0</div><div>South Carolina</div><div><span class="status-alive">&#x25CF;</span></div></div><div class="leaderboard-row" data-name="taylor duran"><div>9</div><div>Taylor Duran</div><div><strong>350</strong></div><div>1850</div><div><div style="font-size: 0.8rem;"><strong>19%</strong></div><div class="efficiency-bar"><div class="efficiency-fill" style="width: 19%"></div></div></div><div>31-6</div><div>270</div><div>80</div><div>0</div><div>0</div><div>0</div><div>South Carolina</div><div><span class="status-alive">&#x25CF;</span></div></div><div class="leaderboard-row" data-name="tim ulaszek"><div>10</div><div>Tim Ulaszek</div><div><strong>350</strong></div><div>1850</div><div><div style="font-size: 0.8rem;"><strong>19%</strong></div><div class="efficiency-bar"><div class="efficiency-fill" style="width: 19%"></div></div></div><div>30-7</div><div>250</div><div>100</div><div>0</div><div>0</div><div>0</div><div>UConn</div><div><span class="status-alive">&#x25CF;</span></div></div><div class="leaderboard-row" data-name="mark demoss"><div>11</div><div>Mark DeMoss</div><div><strong>330</strong></div><div>1830</div><div><div style="font-size: 0.8rem;"><strong>18%</strong></div><div class="efficiency-bar"><div class="efficiency-fill" style="width: 18%"></div></div></div><div>28-9</div><div>230</div><div>100</div><div>0</div><div>0</div><div>0</div><div>UConn</div><div><span class="status-alive">&#x25CF;</span></div></div><div class="leaderboard-row" data-name="claire dieckgraeff"><div>12</div><div>Claire Dieckgraeff</div><div><strong>330</strong></div><div>1810</div><div><div style="font-size: 0.8rem;"><strong>18%</strong></div><div class="efficiency-bar"><div class="efficiency-fill" style="width: 18%"></div></div></div><div>29-9</div><div>250</div><div>80</div><div>0</div><div>0</div><div>0</div><div>UConn</div><div><span class="status-alive">&#x25CF;</span></div></div><div class="leaderboard-row" data-name="mark neary"><div>13</div><div>Mark Neary</div><div><strong>320</strong></div><div>1820</div><div><div style="font-size: 0.8rem;"><strong>18%</strong></div><div class="efficiency-bar"><div class="efficiency-fill" style="width: 18%"></div></div></div><div>30-7</div><div>280</div><div>40</div><div>0</div><div>0</div><div>0</div><div>South Carolina</div><div><span class="status-alive">&#x25CF;</span></div></div><div class="leaderboard-row" data-name="caitlin king"><div>14</div><div>Caitlin King</div><div><strong>310</strong></div><div>1790</div><div><div style="font-size: 0.8rem;"><strong>17%</strong></div><div class="efficiency-bar"><div class="efficiency-fill" style="width: 17%"></div></div></div><div>27-11</div><div>230</div><div>80</div><div>0</div><div>0</div><div>0</div><div>LSU</div><div><span class="status-alive">&#x25CF;</span></div></div><div class="leaderboard-row" data-name="christopher lee"><div>15</div><div>Christopher Lee</div><div><strong>290</strong></div><div>1770</div><div><div style="font-size: 0.8rem;"><strong>16%</strong></div><div class="efficiency-bar"><div class="efficiency-fill" style="width: 16%"></div></div></div><div>26-12</div><div>230</div><div>60</div><div>0</div><div>0</div><div>0</div><div>Michigan</div><div><span class="status-alive">&#x25CF;</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      Powered by <a href="https://www.anthropic.com" target="_blank">Claude</a>
+    </footer>
+  </div>
+
+  <script>
+    // Register datalabels plugin globally
+    Chart.register(ChartDataLabels);
+    // But disable by default — enable per-chart
+    Chart.defaults.plugins.datalabels = { display: false };
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.font.size = 11;
+    Chart.defaults.color = '#30302E';
+
+    // Short name helper for chart labels (disambiguates duplicate first names)
+    const _fnCounts = {"Dany":1,"Brian":1,"Katie":1,"Jeremy":1,"Geordy":1,"Michael":1,"Timothy":1,"Carlee":1,"Taylor":1,"Tim":1,"Mark":2,"Claire":1,"Caitlin":1,"Christopher":1};
+    function shortName(fullName) {
+      if (!fullName) return '';
+      const parts = fullName.split(' ');
+      const first = parts[0];
+      if (_fnCounts[first] > 1 && parts.length > 1) {
+        return first + ' ' + parts[parts.length - 1][0] + '.';
+      }
+      return first;
+    }
+
+    // Consulting-grade base config: no gridlines, clean axes
+    const chartConfig = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          labels: {
+            font: { family: "'Inter', sans-serif", size: 11 },
+            color: '#30302E',
+            padding: 15,
+            usePointStyle: true
+          }
+        },
+        datalabels: { display: false }
+      },
+      scales: {
+        x: { ticks: { color: '#30302E', font: { size: 11 } }, grid: { display: false }, border: { display: false } },
+        y: { ticks: { color: '#30302E', font: { size: 11 } }, grid: { display: false }, border: { display: false } }
+      }
+    };
+
+    // Section 02: Points Chart
+    const pointsCtx = document.getElementById('pointsChart');
+    if (pointsCtx) {
+      const topStandings = [{"entryId":"9000d1f0-2210-11f1-bf74-b3a3c481c9dd","bracketName":"Michigan Madness","owner":"Dany Kotlyar","pts":390,"pct":95.7,"max":1890,"remaining":1500,"rank":1,"eliminated":false,"wins":34,"losses":3,"pointsLost":30,"r64":290,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":290,"r32Max":320,"r64Lost":30,"r32Lost":0,"champion":"UConn"},{"entryId":"505a4530-2338-11f1-867e-93560328942d","bracketName":"brian.g.park's Picks 1","owner":"Brian Park","pts":390,"pct":95.7,"max":1890,"remaining":1500,"rank":1,"eliminated":false,"wins":34,"losses":3,"pointsLost":30,"r64":290,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":290,"r32Max":320,"r64Lost":30,"r32Lost":0,"champion":"UConn"},{"entryId":"31186c80-2223-11f1-b572-b765b22a4274","bracketName":"Katie Byrne","owner":"Katie Batkiewicz Byrne","pts":390,"pct":95.7,"max":1890,"remaining":1500,"rank":1,"eliminated":false,"wins":34,"losses":3,"pointsLost":30,"r64":290,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":290,"r32Max":320,"r64Lost":30,"r32Lost":0,"champion":"LSU"},{"entryId":"be754220-20d3-11f1-8c33-d1a52be5ee24","bracketName":"JG's Bracket (W)","owner":"Jeremy Garcia","pts":390,"pct":95.7,"max":1890,"remaining":1500,"rank":1,"eliminated":false,"wins":34,"losses":3,"pointsLost":30,"r64":290,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":290,"r32Max":320,"r64Lost":30,"r32Lost":0,"champion":"South Carolina"},{"entryId":"a66cc3e0-2314-11f1-a8e5-afceeab2d8a5","bracketName":"GeordyMarget's Picks 1","owner":"Geordy Marget","pts":380,"pct":87.2,"max":1880,"remaining":1500,"rank":5,"eliminated":false,"wins":33,"losses":4,"pointsLost":40,"r64":280,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":280,"r32Max":320,"r64Lost":40,"r32Lost":0,"champion":"UConn"},{"entryId":"ffdecdc0-239f-11f1-9ca1-97a4f8c2604c","bracketName":"Mperry98's Picks 1","owner":"Michael Perry","pts":370,"pct":81.5,"max":1870,"remaining":1500,"rank":6,"eliminated":false,"wins":33,"losses":4,"pointsLost":50,"r64":290,"r32":80,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":290,"r32Max":300,"r64Lost":30,"r32Lost":20,"champion":"UConn"},{"entryId":"8b1015f0-2302-11f1-8a7c-d139c0fecc9d","bracketName":"Geaux LSU","owner":"Timothy King","pts":370,"pct":81.5,"max":1870,"remaining":1500,"rank":6,"eliminated":false,"wins":32,"losses":5,"pointsLost":50,"r64":270,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":270,"r32Max":320,"r64Lost":50,"r32Lost":0,"champion":"UConn"},{"entryId":"45db06c0-22d0-11f1-9a49-9107d93372e2","bracketName":"Carlee Constable's Picks 1","owner":"Carlee Constable","pts":360,"pct":73,"max":1820,"remaining":1460,"rank":8,"eliminated":false,"wins":32,"losses":6,"pointsLost":100,"r64":280,"r32":80,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":280,"r32Max":300,"r64Lost":40,"r32Lost":20,"champion":"South Carolina"},{"entryId":"cd8e4250-230f-11f1-b500-11f4e9b97432","bracketName":"TaylorDuran's Picks 1","owner":"Taylor Duran","pts":350,"pct":63.3,"max":1850,"remaining":1500,"rank":9,"eliminated":false,"wins":31,"losses":6,"pointsLost":70,"r64":270,"r32":80,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":270,"r32Max":300,"r64Lost":50,"r32Lost":20,"champion":"South Carolina"},{"entryId":"46ddb760-2399-11f1-8c90-5b45128f5574","bracketName":"Tim Ulaszek","owner":"Tim Ulaszek","pts":350,"pct":63.3,"max":1850,"remaining":1500,"rank":9,"eliminated":false,"wins":30,"losses":7,"pointsLost":70,"r64":250,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":250,"r32Max":320,"r64Lost":70,"r32Lost":0,"champion":"UConn"},{"entryId":"3313e800-221b-11f1-8f49-418c4dea58ce","bracketName":"demo862's Picks 1","owner":"Mark DeMoss","pts":330,"pct":44.4,"max":1830,"remaining":1500,"rank":11,"eliminated":false,"wins":28,"losses":9,"pointsLost":90,"r64":230,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":230,"r32Max":320,"r64Lost":90,"r32Lost":0,"champion":"UConn"},{"entryId":"38404680-2323-11f1-ab70-4345a54c4061","bracketName":"Claire Dieckgraeff's Picks 1","owner":"Claire Dieckgraeff","pts":330,"pct":44.4,"max":1810,"remaining":1480,"rank":11,"eliminated":false,"wins":29,"losses":9,"pointsLost":110,"r64":250,"r32":80,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":250,"r32Max":280,"r64Lost":70,"r32Lost":40,"champion":"UConn"},{"entryId":"1879a2c0-2395-11f1-a2de-3d8497366683","bracketName":"Neary15's Picks 1","owner":"Mark Neary","pts":320,"pct":35.1,"max":1820,"remaining":1500,"rank":13,"eliminated":false,"wins":30,"losses":7,"pointsLost":100,"r64":280,"r32":40,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":280,"r32Max":260,"r64Lost":40,"r32Lost":60,"champion":"South Carolina"},{"entryId":"c4466d80-221a-11f1-a9b7-91d2aa9791a9","bracketName":"ZBBuzzer Beater","owner":"Caitlin King","pts":310,"pct":28.7,"max":1790,"remaining":1480,"rank":14,"eliminated":false,"wins":27,"losses":11,"pointsLost":130,"r64":230,"r32":80,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":230,"r32Max":280,"r64Lost":90,"r32Lost":40,"champion":"LSU"},{"entryId":"5ea6aac0-22fc-11f1-8b19-c75e24aaf1c4","bracketName":"ceelee89's Picks 1","owner":"Christopher Lee","pts":290,"pct":19.8,"max":1770,"remaining":1480,"rank":15,"eliminated":false,"wins":26,"losses":12,"pointsLost":150,"r64":230,"r32":60,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":230,"r32Max":260,"r64Lost":90,"r32Lost":60,"champion":"Michigan"}];
+      const colors = topStandings.map((s, i) =>
+        i === 0 ? '#D4A843' : i === 1 ? '#8E9196' : i === 2 ? '#9E7B5A' : '#27455C'
+      );
+      new Chart(pointsCtx, {
+        type: 'bar',
+        data: {
+          labels: topStandings.map(s => s.owner),
+          datasets: [{
+            label: 'Points',
+            data: topStandings.map(s => s.pts || 0),
+            backgroundColor: colors,
+            borderRadius: 2
+          }]
+        },
+        options: {
+          ...chartConfig,
+          indexAxis: 'y',
+          plugins: {
+            ...chartConfig.plugins,
+            legend: { display: false },
+            datalabels: {
+              display: true,
+              anchor: 'end',
+              align: 'end',
+              color: '#30302E',
+              font: { weight: '600', size: 11 },
+              formatter: v => v
+            }
+          },
+          scales: {
+            x: { display: false },
+            y: { ticks: { color: '#30302E', font: { weight: '500', size: 11 } }, grid: { display: false }, border: { display: false } }
+          }
+        }
+      });
+    }
+
+    // Section 02: Upside Chart
+    const upsideCtx = document.getElementById('upsideChart');
+    if (upsideCtx) {
+      const topStandings = [{"entryId":"9000d1f0-2210-11f1-bf74-b3a3c481c9dd","bracketName":"Michigan Madness","owner":"Dany Kotlyar","pts":390,"pct":95.7,"max":1890,"remaining":1500,"rank":1,"eliminated":false,"wins":34,"losses":3,"pointsLost":30,"r64":290,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":290,"r32Max":320,"r64Lost":30,"r32Lost":0,"champion":"UConn"},{"entryId":"505a4530-2338-11f1-867e-93560328942d","bracketName":"brian.g.park's Picks 1","owner":"Brian Park","pts":390,"pct":95.7,"max":1890,"remaining":1500,"rank":1,"eliminated":false,"wins":34,"losses":3,"pointsLost":30,"r64":290,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":290,"r32Max":320,"r64Lost":30,"r32Lost":0,"champion":"UConn"},{"entryId":"31186c80-2223-11f1-b572-b765b22a4274","bracketName":"Katie Byrne","owner":"Katie Batkiewicz Byrne","pts":390,"pct":95.7,"max":1890,"remaining":1500,"rank":1,"eliminated":false,"wins":34,"losses":3,"pointsLost":30,"r64":290,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":290,"r32Max":320,"r64Lost":30,"r32Lost":0,"champion":"LSU"},{"entryId":"be754220-20d3-11f1-8c33-d1a52be5ee24","bracketName":"JG's Bracket (W)","owner":"Jeremy Garcia","pts":390,"pct":95.7,"max":1890,"remaining":1500,"rank":1,"eliminated":false,"wins":34,"losses":3,"pointsLost":30,"r64":290,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":290,"r32Max":320,"r64Lost":30,"r32Lost":0,"champion":"South Carolina"},{"entryId":"a66cc3e0-2314-11f1-a8e5-afceeab2d8a5","bracketName":"GeordyMarget's Picks 1","owner":"Geordy Marget","pts":380,"pct":87.2,"max":1880,"remaining":1500,"rank":5,"eliminated":false,"wins":33,"losses":4,"pointsLost":40,"r64":280,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":280,"r32Max":320,"r64Lost":40,"r32Lost":0,"champion":"UConn"},{"entryId":"ffdecdc0-239f-11f1-9ca1-97a4f8c2604c","bracketName":"Mperry98's Picks 1","owner":"Michael Perry","pts":370,"pct":81.5,"max":1870,"remaining":1500,"rank":6,"eliminated":false,"wins":33,"losses":4,"pointsLost":50,"r64":290,"r32":80,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":290,"r32Max":300,"r64Lost":30,"r32Lost":20,"champion":"UConn"},{"entryId":"8b1015f0-2302-11f1-8a7c-d139c0fecc9d","bracketName":"Geaux LSU","owner":"Timothy King","pts":370,"pct":81.5,"max":1870,"remaining":1500,"rank":6,"eliminated":false,"wins":32,"losses":5,"pointsLost":50,"r64":270,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":270,"r32Max":320,"r64Lost":50,"r32Lost":0,"champion":"UConn"},{"entryId":"45db06c0-22d0-11f1-9a49-9107d93372e2","bracketName":"Carlee Constable's Picks 1","owner":"Carlee Constable","pts":360,"pct":73,"max":1820,"remaining":1460,"rank":8,"eliminated":false,"wins":32,"losses":6,"pointsLost":100,"r64":280,"r32":80,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":280,"r32Max":300,"r64Lost":40,"r32Lost":20,"champion":"South Carolina"},{"entryId":"cd8e4250-230f-11f1-b500-11f4e9b97432","bracketName":"TaylorDuran's Picks 1","owner":"Taylor Duran","pts":350,"pct":63.3,"max":1850,"remaining":1500,"rank":9,"eliminated":false,"wins":31,"losses":6,"pointsLost":70,"r64":270,"r32":80,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":270,"r32Max":300,"r64Lost":50,"r32Lost":20,"champion":"South Carolina"},{"entryId":"46ddb760-2399-11f1-8c90-5b45128f5574","bracketName":"Tim Ulaszek","owner":"Tim Ulaszek","pts":350,"pct":63.3,"max":1850,"remaining":1500,"rank":9,"eliminated":false,"wins":30,"losses":7,"pointsLost":70,"r64":250,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":250,"r32Max":320,"r64Lost":70,"r32Lost":0,"champion":"UConn"},{"entryId":"3313e800-221b-11f1-8f49-418c4dea58ce","bracketName":"demo862's Picks 1","owner":"Mark DeMoss","pts":330,"pct":44.4,"max":1830,"remaining":1500,"rank":11,"eliminated":false,"wins":28,"losses":9,"pointsLost":90,"r64":230,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":230,"r32Max":320,"r64Lost":90,"r32Lost":0,"champion":"UConn"},{"entryId":"38404680-2323-11f1-ab70-4345a54c4061","bracketName":"Claire Dieckgraeff's Picks 1","owner":"Claire Dieckgraeff","pts":330,"pct":44.4,"max":1810,"remaining":1480,"rank":11,"eliminated":false,"wins":29,"losses":9,"pointsLost":110,"r64":250,"r32":80,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":250,"r32Max":280,"r64Lost":70,"r32Lost":40,"champion":"UConn"},{"entryId":"1879a2c0-2395-11f1-a2de-3d8497366683","bracketName":"Neary15's Picks 1","owner":"Mark Neary","pts":320,"pct":35.1,"max":1820,"remaining":1500,"rank":13,"eliminated":false,"wins":30,"losses":7,"pointsLost":100,"r64":280,"r32":40,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":280,"r32Max":260,"r64Lost":40,"r32Lost":60,"champion":"South Carolina"},{"entryId":"c4466d80-221a-11f1-a9b7-91d2aa9791a9","bracketName":"ZBBuzzer Beater","owner":"Caitlin King","pts":310,"pct":28.7,"max":1790,"remaining":1480,"rank":14,"eliminated":false,"wins":27,"losses":11,"pointsLost":130,"r64":230,"r32":80,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":230,"r32Max":280,"r64Lost":90,"r32Lost":40,"champion":"LSU"},{"entryId":"5ea6aac0-22fc-11f1-8b19-c75e24aaf1c4","bracketName":"ceelee89's Picks 1","owner":"Christopher Lee","pts":290,"pct":19.8,"max":1770,"remaining":1480,"rank":15,"eliminated":false,"wins":26,"losses":12,"pointsLost":150,"r64":230,"r32":60,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":230,"r32Max":260,"r64Lost":90,"r32Lost":60,"champion":"Michigan"}];
+      new Chart(upsideCtx, {
+        type: 'bar',
+        data: {
+          labels: topStandings.map(s => s.owner),
+          datasets: [
+            {
+              label: 'Current Points',
+              data: topStandings.map(s => s.pts || 0),
+              backgroundColor: '#27455C',
+              borderRadius: 2
+            },
+            {
+              label: 'Remaining Upside',
+              data: topStandings.map(s => (s.remaining || 0)),
+              backgroundColor: '#E5E0DC',
+              borderRadius: 2
+            }
+          ]
+        },
+        options: {
+          ...chartConfig,
+          indexAxis: 'y',
+          plugins: {
+            ...chartConfig.plugins,
+            legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } },
+            datalabels: { display: false }
+          },
+          scales: {
+            x: { stacked: true, display: false },
+            y: { stacked: true, ticks: { color: '#30302E', font: { weight: '500', size: 11 } }, grid: { display: false }, border: { display: false } }
+          }
+        }
+      });
+    }
+
+    // Section 03: Round-by-Round
+    const roundCtx = document.getElementById('roundByRoundChart');
+    if (roundCtx) {
+      const sortedStandings = [{"entryId":"9000d1f0-2210-11f1-bf74-b3a3c481c9dd","bracketName":"Michigan Madness","owner":"Dany Kotlyar","pts":390,"pct":95.7,"max":1890,"remaining":1500,"rank":1,"eliminated":false,"wins":34,"losses":3,"pointsLost":30,"r64":290,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":290,"r32Max":320,"r64Lost":30,"r32Lost":0,"champion":"UConn"},{"entryId":"505a4530-2338-11f1-867e-93560328942d","bracketName":"brian.g.park's Picks 1","owner":"Brian Park","pts":390,"pct":95.7,"max":1890,"remaining":1500,"rank":1,"eliminated":false,"wins":34,"losses":3,"pointsLost":30,"r64":290,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":290,"r32Max":320,"r64Lost":30,"r32Lost":0,"champion":"UConn"},{"entryId":"31186c80-2223-11f1-b572-b765b22a4274","bracketName":"Katie Byrne","owner":"Katie Batkiewicz Byrne","pts":390,"pct":95.7,"max":1890,"remaining":1500,"rank":1,"eliminated":false,"wins":34,"losses":3,"pointsLost":30,"r64":290,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":290,"r32Max":320,"r64Lost":30,"r32Lost":0,"champion":"LSU"},{"entryId":"be754220-20d3-11f1-8c33-d1a52be5ee24","bracketName":"JG's Bracket (W)","owner":"Jeremy Garcia","pts":390,"pct":95.7,"max":1890,"remaining":1500,"rank":1,"eliminated":false,"wins":34,"losses":3,"pointsLost":30,"r64":290,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":290,"r32Max":320,"r64Lost":30,"r32Lost":0,"champion":"South Carolina"},{"entryId":"a66cc3e0-2314-11f1-a8e5-afceeab2d8a5","bracketName":"GeordyMarget's Picks 1","owner":"Geordy Marget","pts":380,"pct":87.2,"max":1880,"remaining":1500,"rank":5,"eliminated":false,"wins":33,"losses":4,"pointsLost":40,"r64":280,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":280,"r32Max":320,"r64Lost":40,"r32Lost":0,"champion":"UConn"},{"entryId":"ffdecdc0-239f-11f1-9ca1-97a4f8c2604c","bracketName":"Mperry98's Picks 1","owner":"Michael Perry","pts":370,"pct":81.5,"max":1870,"remaining":1500,"rank":6,"eliminated":false,"wins":33,"losses":4,"pointsLost":50,"r64":290,"r32":80,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":290,"r32Max":300,"r64Lost":30,"r32Lost":20,"champion":"UConn"},{"entryId":"8b1015f0-2302-11f1-8a7c-d139c0fecc9d","bracketName":"Geaux LSU","owner":"Timothy King","pts":370,"pct":81.5,"max":1870,"remaining":1500,"rank":6,"eliminated":false,"wins":32,"losses":5,"pointsLost":50,"r64":270,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":270,"r32Max":320,"r64Lost":50,"r32Lost":0,"champion":"UConn"},{"entryId":"45db06c0-22d0-11f1-9a49-9107d93372e2","bracketName":"Carlee Constable's Picks 1","owner":"Carlee Constable","pts":360,"pct":73,"max":1820,"remaining":1460,"rank":8,"eliminated":false,"wins":32,"losses":6,"pointsLost":100,"r64":280,"r32":80,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":280,"r32Max":300,"r64Lost":40,"r32Lost":20,"champion":"South Carolina"},{"entryId":"cd8e4250-230f-11f1-b500-11f4e9b97432","bracketName":"TaylorDuran's Picks 1","owner":"Taylor Duran","pts":350,"pct":63.3,"max":1850,"remaining":1500,"rank":9,"eliminated":false,"wins":31,"losses":6,"pointsLost":70,"r64":270,"r32":80,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":270,"r32Max":300,"r64Lost":50,"r32Lost":20,"champion":"South Carolina"},{"entryId":"46ddb760-2399-11f1-8c90-5b45128f5574","bracketName":"Tim Ulaszek","owner":"Tim Ulaszek","pts":350,"pct":63.3,"max":1850,"remaining":1500,"rank":9,"eliminated":false,"wins":30,"losses":7,"pointsLost":70,"r64":250,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":250,"r32Max":320,"r64Lost":70,"r32Lost":0,"champion":"UConn"},{"entryId":"3313e800-221b-11f1-8f49-418c4dea58ce","bracketName":"demo862's Picks 1","owner":"Mark DeMoss","pts":330,"pct":44.4,"max":1830,"remaining":1500,"rank":11,"eliminated":false,"wins":28,"losses":9,"pointsLost":90,"r64":230,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":230,"r32Max":320,"r64Lost":90,"r32Lost":0,"champion":"UConn"},{"entryId":"38404680-2323-11f1-ab70-4345a54c4061","bracketName":"Claire Dieckgraeff's Picks 1","owner":"Claire Dieckgraeff","pts":330,"pct":44.4,"max":1810,"remaining":1480,"rank":11,"eliminated":false,"wins":29,"losses":9,"pointsLost":110,"r64":250,"r32":80,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":250,"r32Max":280,"r64Lost":70,"r32Lost":40,"champion":"UConn"},{"entryId":"1879a2c0-2395-11f1-a2de-3d8497366683","bracketName":"Neary15's Picks 1","owner":"Mark Neary","pts":320,"pct":35.1,"max":1820,"remaining":1500,"rank":13,"eliminated":false,"wins":30,"losses":7,"pointsLost":100,"r64":280,"r32":40,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":280,"r32Max":260,"r64Lost":40,"r32Lost":60,"champion":"South Carolina"},{"entryId":"c4466d80-221a-11f1-a9b7-91d2aa9791a9","bracketName":"ZBBuzzer Beater","owner":"Caitlin King","pts":310,"pct":28.7,"max":1790,"remaining":1480,"rank":14,"eliminated":false,"wins":27,"losses":11,"pointsLost":130,"r64":230,"r32":80,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":230,"r32Max":280,"r64Lost":90,"r32Lost":40,"champion":"LSU"},{"entryId":"5ea6aac0-22fc-11f1-8b19-c75e24aaf1c4","bracketName":"ceelee89's Picks 1","owner":"Christopher Lee","pts":290,"pct":19.8,"max":1770,"remaining":1480,"rank":15,"eliminated":false,"wins":26,"losses":12,"pointsLost":150,"r64":230,"r32":60,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":230,"r32Max":260,"r64Lost":90,"r32Lost":60,"champion":"Michigan"}];
+      const roundPointsData = {"Dany Kotlyar":{"r64":290,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0},"Brian Park":{"r64":290,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0},"Katie Batkiewicz Byrne":{"r64":290,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0},"Jeremy Garcia":{"r64":290,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0},"Geordy Marget":{"r64":280,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0},"Michael Perry":{"r64":290,"r32":80,"s16":0,"e8":0,"f4":0,"champ":0},"Timothy King":{"r64":270,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0},"Carlee Constable":{"r64":280,"r32":80,"s16":0,"e8":0,"f4":0,"champ":0},"Taylor Duran":{"r64":270,"r32":80,"s16":0,"e8":0,"f4":0,"champ":0},"Tim Ulaszek":{"r64":250,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0},"Mark DeMoss":{"r64":230,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0},"Claire Dieckgraeff":{"r64":250,"r32":80,"s16":0,"e8":0,"f4":0,"champ":0},"Mark Neary":{"r64":280,"r32":40,"s16":0,"e8":0,"f4":0,"champ":0},"Caitlin King":{"r64":230,"r32":80,"s16":0,"e8":0,"f4":0,"champ":0},"Christopher Lee":{"r64":230,"r32":60,"s16":0,"e8":0,"f4":0,"champ":0}};
+
+      const r64Data = sortedStandings.map(s => roundPointsData[s.owner]?.r64 || 0);
+      const r32Data = sortedStandings.map(s => roundPointsData[s.owner]?.r32 || 0);
+      const s16Data = sortedStandings.map(s => roundPointsData[s.owner]?.s16 || 0);
+      const e8Data = sortedStandings.map(s => roundPointsData[s.owner]?.e8 || 0);
+      const f4Data = sortedStandings.map(s => roundPointsData[s.owner]?.f4 || 0);
+      const champData = sortedStandings.map(s => roundPointsData[s.owner]?.champ || 0);
+
+      new Chart(roundCtx, {
+        type: 'bar',
+        data: {
+          labels: sortedStandings.map(s => s.owner),
+          datasets: [
+            { label: 'R64', data: r64Data, backgroundColor: '#27455C', borderRadius: 0 },
+            { label: 'R32', data: r32Data, backgroundColor: '#346E4A', borderRadius: 0 },
+            { label: 'S16', data: s16Data, backgroundColor: '#76B729', borderRadius: 0 },
+            { label: 'E8', data: e8Data, backgroundColor: '#D4A843', borderRadius: 0 },
+            { label: 'F4', data: f4Data, backgroundColor: '#DC1A41', borderRadius: 0 },
+            { label: 'Champ', data: champData, backgroundColor: '#30302E', borderRadius: 0 }
+          ]
+        },
+        options: {
+          ...chartConfig,
+          indexAxis: 'y',
+          plugins: {
+            ...chartConfig.plugins,
+            datalabels: {
+              display: true,
+              anchor: 'end',
+              align: 'end',
+              color: '#30302E',
+              font: { weight: '600', size: 10 },
+              formatter: (v, ctx) => {
+                const datasetIndex = ctx.datasetIndex;
+                const dataIndex = ctx.dataIndex;
+                if (datasetIndex === ctx.chart.data.datasets.length - 1) {
+                  let total = 0;
+                  ctx.chart.data.datasets.forEach(ds => {
+                    total += ds.data[dataIndex] || 0;
+                  });
+                  return total;
+                }
+                return '';
+              }
+            }
+          },
+          scales: {
+            x: {
+              stacked: true,
+              ticks: { color: '#30302E', font: { size: 11 } },
+              grid: { display: false },
+              border: { display: false }
+            },
+            y: { stacked: true, ticks: { color: '#30302E', font: { size: 11 } }, grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    // Section 04: Champion Distribution
+    const championCtx = document.getElementById('championChart');
+    if (championCtx) {
+      const champions = ["UConn","UConn","LSU","South Carolina","UConn","UConn","UConn","South Carolina","South Carolina","UConn","UConn","UConn","South Carolina","LSU","Michigan"];
+      const champCounts = {};
+      champions.forEach(c => { champCounts[c] = (champCounts[c] || 0) + 1; });
+
+      const champEntries = Object.entries(champCounts).sort((a, b) => b[1] - a[1]);
+      const labels = champEntries.map(e => e[0]);
+      const data = champEntries.map(e => e[1]);
+      const colors = ['#DC1A41', '#27455C', '#346E4A', '#76B729', '#D4A843', '#30302E', '#8E9196', '#9E7B5A'];
+
+      new Chart(championCtx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Bracket Count',
+            data: data,
+            backgroundColor: colors.slice(0, data.length),
+            borderRadius: 2
+          }]
+        },
+        options: {
+          ...chartConfig,
+          indexAxis: 'y',
+          plugins: {
+            ...chartConfig.plugins,
+            legend: { display: false },
+            datalabels: {
+              display: true,
+              anchor: 'end',
+              align: 'end',
+              color: '#30302E',
+              font: { weight: '600', size: 11 },
+              formatter: v => v
+            }
+          },
+          scales: {
+            x: { display: false, grid: { display: false }, border: { display: false } },
+            y: { ticks: { color: '#30302E', font: { weight: '500', size: 11 } }, grid: { display: false }, border: { display: false } }
+          }
+        }
+      });
+    }
+
+
+    // Section 07: Bracket Quality - Efficiency
+    const skillLuckCtx = document.getElementById('skillLuckChart');
+    if (skillLuckCtx) {
+      const effData = [{"owner":"Dany Kotlyar","efficiency":21,"pts":390,"max":1890,"pointsLost":30,"pct":95.7},{"owner":"Brian Park","efficiency":21,"pts":390,"max":1890,"pointsLost":30,"pct":95.7},{"owner":"Katie Batkiewicz Byrne","efficiency":21,"pts":390,"max":1890,"pointsLost":30,"pct":95.7},{"owner":"Jeremy Garcia","efficiency":21,"pts":390,"max":1890,"pointsLost":30,"pct":95.7},{"owner":"Geordy Marget","efficiency":20,"pts":380,"max":1880,"pointsLost":40,"pct":87.2},{"owner":"Michael Perry","efficiency":20,"pts":370,"max":1870,"pointsLost":50,"pct":81.5},{"owner":"Timothy King","efficiency":20,"pts":370,"max":1870,"pointsLost":50,"pct":81.5},{"owner":"Carlee Constable","efficiency":20,"pts":360,"max":1820,"pointsLost":100,"pct":73},{"owner":"Taylor Duran","efficiency":19,"pts":350,"max":1850,"pointsLost":70,"pct":63.3},{"owner":"Tim Ulaszek","efficiency":19,"pts":350,"max":1850,"pointsLost":70,"pct":63.3},{"owner":"Mark DeMoss","efficiency":18,"pts":330,"max":1830,"pointsLost":90,"pct":44.4},{"owner":"Claire Dieckgraeff","efficiency":18,"pts":330,"max":1810,"pointsLost":110,"pct":44.4}];
+      new Chart(skillLuckCtx, {
+        type: 'bar',
+        data: {
+          labels: effData.map(e => e.owner.substring(0, 18)),
+          datasets: [{
+            label: 'Efficiency %',
+            data: effData.map(e => e.efficiency),
+            backgroundColor: effData.map(e => e.efficiency >= 24 ? '#346E4A' : e.efficiency >= 20 ? '#76B729' : '#D4A843'),
+            borderWidth: 0
+          }]
+        },
+        options: {
+          ...chartConfig,
+          indexAxis: 'y',
+          plugins: {
+            ...chartConfig.plugins,
+            datalabels: {
+              display: true,
+              anchor: 'end',
+              align: 'end',
+              color: '#30302E',
+              font: { weight: '600', size: 10 },
+              formatter: v => v + '%'
+            },
+            legend: { display: false }
+          },
+          scales: {
+            x: {
+              display: false,
+              grid: { display: false },
+              border: { display: false }
+            },
+            y: {
+              ticks: { color: '#30302E', font: { size: 10 } },
+              grid: { display: false },
+              border: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    // Section 09: Chalk vs Uniqueness Scatter with team logo images
+    const chalkUniquenessCtx = document.getElementById('chalkUniquenessChart');
+    if (chalkUniquenessCtx) {
+      const scatterPoints = [{"x":77,"y":19,"label":"Brian Park","champLogo":"https://a.espncdn.com/i/teamlogos/ncaa/500/41.png","champName":"UConn"},{"x":77,"y":18,"label":"Jeremy Garcia","champLogo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2579.png","champName":"South Carolina"},{"x":77,"y":25,"label":"Mark DeMoss","champLogo":"https://a.espncdn.com/i/teamlogos/ncaa/500/41.png","champName":"UConn"},{"x":76,"y":22,"label":"Katie Batkiewicz Byrne","champLogo":"https://a.espncdn.com/i/teamlogos/ncaa/500/99.png","champName":"LSU"},{"x":75,"y":19,"label":"Dany Kotlyar","champLogo":"https://a.espncdn.com/i/teamlogos/ncaa/500/41.png","champName":"UConn"},{"x":75,"y":22,"label":"Timothy King","champLogo":"https://a.espncdn.com/i/teamlogos/ncaa/500/41.png","champName":"UConn"},{"x":75,"y":22,"label":"Carlee Constable","champLogo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2579.png","champName":"South Carolina"},{"x":74,"y":23,"label":"Michael Perry","champLogo":"https://a.espncdn.com/i/teamlogos/ncaa/500/41.png","champName":"UConn"},{"x":74,"y":26,"label":"Taylor Duran","champLogo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2579.png","champName":"South Carolina"},{"x":73,"y":20,"label":"Geordy Marget","champLogo":"https://a.espncdn.com/i/teamlogos/ncaa/500/41.png","champName":"UConn"},{"x":73,"y":23,"label":"Tim Ulaszek","champLogo":"https://a.espncdn.com/i/teamlogos/ncaa/500/41.png","champName":"UConn"},{"x":71,"y":28,"label":"Claire Dieckgraeff","champLogo":"https://a.espncdn.com/i/teamlogos/ncaa/500/41.png","champName":"UConn"},{"x":70,"y":29,"label":"Mark Neary","champLogo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2579.png","champName":"South Carolina"},{"x":64,"y":33,"label":"Caitlin King","champLogo":"https://a.espncdn.com/i/teamlogos/ncaa/500/99.png","champName":"LSU"},{"x":60,"y":37,"label":"Christopher Lee","champLogo":"https://a.espncdn.com/i/teamlogos/ncaa/500/130.png","champName":"Michigan"}];
+
+      // Preload logo images
+      const logoImages = {};
+      const logoLoadPromises = [];
+      const uniqueLogos = [...new Set(scatterPoints.map(p => p.champLogo).filter(Boolean))];
+      uniqueLogos.forEach(url => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        const p = new Promise(resolve => {
+          img.onload = () => { logoImages[url] = img; resolve(); };
+          img.onerror = () => resolve();
+        });
+        img.src = url;
+        logoLoadPromises.push(p);
+      });
+
+      Promise.all(logoLoadPromises).then(() => {
+        // Custom plugin to draw team logos as data points
+        const logoPlugin = {
+          id: 'logoPoints',
+          afterDatasetsDraw(chart) {
+            const ctx = chart.ctx;
+            const meta = chart.getDatasetMeta(0);
+            meta.data.forEach((point, i) => {
+              const dp = scatterPoints[i];
+              const img = logoImages[dp.champLogo];
+              const sz = 24;
+              if (img) {
+                ctx.drawImage(img, point.x - sz/2, point.y - sz/2, sz, sz);
+              } else {
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, 6, 0, Math.PI * 2);
+                ctx.fillStyle = '#27455C';
+                ctx.fill();
+              }
+            });
+          }
+        };
+
+        new Chart(chalkUniquenessCtx, {
+          type: 'scatter',
+          data: {
+            datasets: [{
+              data: scatterPoints,
+              backgroundColor: 'transparent',
+              borderColor: 'transparent',
+              pointRadius: 0
+            }]
+          },
+          plugins: [logoPlugin],
+          options: {
+            ...chartConfig,
+            plugins: {
+              ...chartConfig.plugins,
+              legend: { display: false },
+              datalabels: {
+                display: true,
+                anchor: 'center',
+                align: function(context) {
+                  // Alternate label positions to avoid overlap
+                  const idx = context.dataIndex;
+                  const point = scatterPoints[idx];
+                  // Check for nearby points and alternate directions
+                  let hasCloseAbove = false;
+                  let hasCloseBelow = false;
+                  scatterPoints.forEach((other, j) => {
+                    if (j === idx) return;
+                    const dx = Math.abs(point.x - other.x);
+                    const dy = point.y - other.y;
+                    if (dx < 5) {
+                      if (dy > 0 && dy < 8) hasCloseBelow = true;
+                      if (dy < 0 && dy > -8) hasCloseAbove = true;
+                    }
+                  });
+                  const positions = ['top', 'bottom', 'right', 'left'];
+                  if (hasCloseAbove) return positions[(idx % 3) + 1];
+                  return positions[idx % 2]; // alternate top/bottom
+                },
+                offset: 18,
+                color: '#30302E',
+                font: { weight: '600', size: 9 },
+                formatter: (v) => shortName(v.label)
+              },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => {
+                    const dp = scatterPoints[ctx.dataIndex];
+                    return dp.label + ' — Chalk: ' + dp.x + '%, Unique: ' + dp.y + '% (' + dp.champName + ')';
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                title: { display: true, text: 'Chalk Score (%) — Higher = More Favorites', color: '#30302E', font: { size: 12, weight: '600' } },
+                ticks: { color: '#30302E', font: { size: 11 } },
+                grid: { display: false },
+                border: { display: false }
+              },
+              y: {
+                title: { display: true, text: 'Uniqueness (%) — Higher = More Contrarian', color: '#30302E', font: { size: 12, weight: '600' } },
+                ticks: { color: '#30302E', font: { size: 11 } },
+                grid: { display: false },
+                border: { display: false }
+              }
+            }
+          }
+        });
+      });
+    }
+
+    // Section 10: Upset Appetite Chart
+    const upsetAppetiteCtx = document.getElementById('upsetAppetiteChart');
+    if (upsetAppetiteCtx) {
+      const chartData = {"labels":["Christopher","Caitlin","Mark N.","Geordy","Michael","Taylor","Dany","Timothy","Carlee","Tim","Claire","Brian","Katie","Jeremy","Mark D."],"datasets":[{"label":"Favorites","data":[10,11,12,13,13,13,14,14,14,14,14,15,15,15,15],"backgroundColor":"#27455C"},{"label":"Underdogs","data":[6,5,4,3,3,3,2,2,2,2,2,1,1,1,1],"backgroundColor":"#DC1A41"}]};
+
+      new Chart(upsetAppetiteCtx, {
+        type: 'bar',
+        data: chartData,
+        options: {
+          ...chartConfig,
+          indexAxis: 'y',
+          plugins: {
+            ...chartConfig.plugins,
+            datalabels: { display: false }
+          },
+          scales: {
+            x: {
+              stacked: true,
+              ticks: { color: '#30302E', font: { size: 11 } },
+              grid: { display: false },
+              border: { display: false }
+            },
+            y: { stacked: true, ticks: { color: '#30302E', font: { size: 11 } }, grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    // Section 14: Elimination
+    const eliminationCtx = document.getElementById('eliminationChart');
+    if (eliminationCtx) {
+      const allStandings = [{"entryId":"9000d1f0-2210-11f1-bf74-b3a3c481c9dd","bracketName":"Michigan Madness","owner":"Dany Kotlyar","pts":390,"pct":95.7,"max":1890,"remaining":1500,"rank":1,"eliminated":false,"wins":34,"losses":3,"pointsLost":30,"r64":290,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":290,"r32Max":320,"r64Lost":30,"r32Lost":0,"champion":"UConn"},{"entryId":"505a4530-2338-11f1-867e-93560328942d","bracketName":"brian.g.park's Picks 1","owner":"Brian Park","pts":390,"pct":95.7,"max":1890,"remaining":1500,"rank":1,"eliminated":false,"wins":34,"losses":3,"pointsLost":30,"r64":290,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":290,"r32Max":320,"r64Lost":30,"r32Lost":0,"champion":"UConn"},{"entryId":"31186c80-2223-11f1-b572-b765b22a4274","bracketName":"Katie Byrne","owner":"Katie Batkiewicz Byrne","pts":390,"pct":95.7,"max":1890,"remaining":1500,"rank":1,"eliminated":false,"wins":34,"losses":3,"pointsLost":30,"r64":290,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":290,"r32Max":320,"r64Lost":30,"r32Lost":0,"champion":"LSU"},{"entryId":"be754220-20d3-11f1-8c33-d1a52be5ee24","bracketName":"JG's Bracket (W)","owner":"Jeremy Garcia","pts":390,"pct":95.7,"max":1890,"remaining":1500,"rank":1,"eliminated":false,"wins":34,"losses":3,"pointsLost":30,"r64":290,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":290,"r32Max":320,"r64Lost":30,"r32Lost":0,"champion":"South Carolina"},{"entryId":"a66cc3e0-2314-11f1-a8e5-afceeab2d8a5","bracketName":"GeordyMarget's Picks 1","owner":"Geordy Marget","pts":380,"pct":87.2,"max":1880,"remaining":1500,"rank":5,"eliminated":false,"wins":33,"losses":4,"pointsLost":40,"r64":280,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":280,"r32Max":320,"r64Lost":40,"r32Lost":0,"champion":"UConn"},{"entryId":"ffdecdc0-239f-11f1-9ca1-97a4f8c2604c","bracketName":"Mperry98's Picks 1","owner":"Michael Perry","pts":370,"pct":81.5,"max":1870,"remaining":1500,"rank":6,"eliminated":false,"wins":33,"losses":4,"pointsLost":50,"r64":290,"r32":80,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":290,"r32Max":300,"r64Lost":30,"r32Lost":20,"champion":"UConn"},{"entryId":"8b1015f0-2302-11f1-8a7c-d139c0fecc9d","bracketName":"Geaux LSU","owner":"Timothy King","pts":370,"pct":81.5,"max":1870,"remaining":1500,"rank":6,"eliminated":false,"wins":32,"losses":5,"pointsLost":50,"r64":270,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":270,"r32Max":320,"r64Lost":50,"r32Lost":0,"champion":"UConn"},{"entryId":"45db06c0-22d0-11f1-9a49-9107d93372e2","bracketName":"Carlee Constable's Picks 1","owner":"Carlee Constable","pts":360,"pct":73,"max":1820,"remaining":1460,"rank":8,"eliminated":false,"wins":32,"losses":6,"pointsLost":100,"r64":280,"r32":80,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":280,"r32Max":300,"r64Lost":40,"r32Lost":20,"champion":"South Carolina"},{"entryId":"cd8e4250-230f-11f1-b500-11f4e9b97432","bracketName":"TaylorDuran's Picks 1","owner":"Taylor Duran","pts":350,"pct":63.3,"max":1850,"remaining":1500,"rank":9,"eliminated":false,"wins":31,"losses":6,"pointsLost":70,"r64":270,"r32":80,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":270,"r32Max":300,"r64Lost":50,"r32Lost":20,"champion":"South Carolina"},{"entryId":"46ddb760-2399-11f1-8c90-5b45128f5574","bracketName":"Tim Ulaszek","owner":"Tim Ulaszek","pts":350,"pct":63.3,"max":1850,"remaining":1500,"rank":9,"eliminated":false,"wins":30,"losses":7,"pointsLost":70,"r64":250,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":250,"r32Max":320,"r64Lost":70,"r32Lost":0,"champion":"UConn"},{"entryId":"3313e800-221b-11f1-8f49-418c4dea58ce","bracketName":"demo862's Picks 1","owner":"Mark DeMoss","pts":330,"pct":44.4,"max":1830,"remaining":1500,"rank":11,"eliminated":false,"wins":28,"losses":9,"pointsLost":90,"r64":230,"r32":100,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":230,"r32Max":320,"r64Lost":90,"r32Lost":0,"champion":"UConn"},{"entryId":"38404680-2323-11f1-ab70-4345a54c4061","bracketName":"Claire Dieckgraeff's Picks 1","owner":"Claire Dieckgraeff","pts":330,"pct":44.4,"max":1810,"remaining":1480,"rank":11,"eliminated":false,"wins":29,"losses":9,"pointsLost":110,"r64":250,"r32":80,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":250,"r32Max":280,"r64Lost":70,"r32Lost":40,"champion":"UConn"},{"entryId":"1879a2c0-2395-11f1-a2de-3d8497366683","bracketName":"Neary15's Picks 1","owner":"Mark Neary","pts":320,"pct":35.1,"max":1820,"remaining":1500,"rank":13,"eliminated":false,"wins":30,"losses":7,"pointsLost":100,"r64":280,"r32":40,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":280,"r32Max":260,"r64Lost":40,"r32Lost":60,"champion":"South Carolina"},{"entryId":"c4466d80-221a-11f1-a9b7-91d2aa9791a9","bracketName":"ZBBuzzer Beater","owner":"Caitlin King","pts":310,"pct":28.7,"max":1790,"remaining":1480,"rank":14,"eliminated":false,"wins":27,"losses":11,"pointsLost":130,"r64":230,"r32":80,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":230,"r32Max":280,"r64Lost":90,"r32Lost":40,"champion":"LSU"},{"entryId":"5ea6aac0-22fc-11f1-8b19-c75e24aaf1c4","bracketName":"ceelee89's Picks 1","owner":"Christopher Lee","pts":290,"pct":19.8,"max":1770,"remaining":1480,"rank":15,"eliminated":false,"wins":26,"losses":12,"pointsLost":150,"r64":230,"r32":60,"s16":0,"e8":0,"f4":0,"champ":0,"r64Max":230,"r32Max":260,"r64Lost":90,"r32Lost":60,"champion":"Michigan"}];
+
+      new Chart(eliminationCtx, {
+        type: 'bar',
+        data: {
+          labels: allStandings.map(s => s.owner),
+          datasets: [
+            {
+              label: 'Current Points',
+              data: allStandings.map(s => s.pts || 0),
+              backgroundColor: allStandings.map(s => s.eliminated ? '#DC1A41' : '#346E4A'),
+              borderRadius: 2
+            },
+            {
+              label: 'Max Possible',
+              data: allStandings.map(s => s.max || 0),
+              backgroundColor: '#E5E0DC',
+              borderRadius: 2
+            }
+          ]
+        },
+        options: {
+          ...chartConfig,
+          indexAxis: 'y',
+          plugins: {
+            ...chartConfig.plugins,
+            datalabels: {
+              display: true,
+              anchor: 'end',
+              align: 'end',
+              color: '#30302E',
+              font: { weight: '600', size: 10 },
+              formatter: (v, ctx) => {
+                return ctx.datasetIndex === 0 ? v : '';
+              }
+            }
+          },
+          scales: {
+            x: {
+              stacked: false,
+              ticks: { color: '#30302E', font: { size: 11 } },
+              grid: { display: false },
+              border: { display: false }
+            },
+            y: { ticks: { color: '#30302E', font: { size: 11 } }, grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('.leaderboard-row');
+        rows.forEach(row => {
+          const playerName = row.children[1].textContent.toLowerCase();
+          row.style.display = playerName.includes(searchTerm) ? '' : 'none';
+        });
+      });
+    }
+  </script>
+</body>
+</html>
